@@ -152,6 +152,41 @@
     /* Отступ внизу для панели */
     .spacer { height: 20px; }
 
+    /* === Экран Арены === */
+    #arenaScreen { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
+    .arena-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--card-border);
+    }
+    .arena-header h2 { font-size: 18px; margin: 0; }
+    .back-btn {
+      background: var(--card); border: 1px solid var(--card-border); color: var(--text);
+      width: 36px; height: 36px; border-radius: 12px; font-size: 22px; cursor: pointer;
+    }
+    .arena-body { flex: 1; padding: 18px 16px; overflow-y: auto; }
+    .arena-bank-card {
+      background: linear-gradient(135deg, rgba(124,92,255,0.25), rgba(0,212,255,0.2));
+      border: 1px solid var(--card-border); border-radius: 20px;
+      padding: 24px; text-align: center; margin-bottom: 18px;
+    }
+    .arena-bank-label { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+    .arena-bank-amount { font-size: 40px; font-weight: 800; color: var(--gold); }
+    .arena-bank-sub { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .arena-players-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .arena-players { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; margin-bottom: 18px; }
+    .arena-bet-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+    .arena-bet-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .bet-btn {
+      background: var(--card); border: 1px solid var(--card-border); color: var(--text);
+      padding: 16px 0; border-radius: 14px; font-size: 18px; font-weight: 700; cursor: pointer;
+    }
+    .bet-btn.selected { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; }
+    .arena-play-btn {
+      width: 100%; padding: 16px 0; border: none; border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-size: 17px; font-weight: 700; cursor: pointer;
+    }
+
     /* === Нижняя панель навигации === */
     .bottom-nav {
       position: fixed;
@@ -220,7 +255,7 @@
         <div class="game-arrow">›</div>
       </div>
 
-      <div class="game-card">
+      <div class="game-card" data-open="arena">
         <div class="game-icon icon-arena">⚔️</div>
         <div class="game-info">
           <div class="game-name">Арена (PvP)</div>
@@ -246,6 +281,37 @@
       <div style="text-align:center; color:var(--muted); padding:40px 0;">
         🎁 Здесь будут подарки
       </div>
+    </div>
+  </div>
+
+  <!-- Экран Арены -->
+  <div id="arenaScreen" style="display:none;">
+    <div class="arena-header">
+      <button class="back-btn" id="arenaBack">‹</button>
+      <h2>⚔️ Арена</h2>
+      <div></div>
+    </div>
+    <div class="arena-body">
+      <div class="arena-bank-card">
+        <div class="arena-bank-label">Общий банк</div>
+        <div class="arena-bank-amount"><span id="arenaBank">0</span> ⭐</div>
+        <div class="arena-bank-sub">Участников: <span id="arenaPlayers">0</span></div>
+      </div>
+
+      <div class="arena-players">
+        <div class="arena-players-title">Участники</div>
+        <div id="arenaPlayersList" style="color:var(--muted);font-size:14px;">Пока никто не поставил</div>
+      </div>
+
+      <div class="arena-bet-title">Сделать ставку</div>
+      <div class="arena-bet-options">
+        <button class="bet-btn" data-bet="100">100</button>
+        <button class="bet-btn" data-bet="250">250</button>
+        <button class="bet-btn" data-bet="500">500</button>
+        <button class="bet-btn" data-bet="1000">1000</button>
+      </div>
+      <button class="arena-play-btn" id="arenaPlaceBet">🎯 В игру</button>
+      <div id="arenaStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:12px;"></div>
     </div>
   </div>
 
@@ -307,6 +373,97 @@
     document.getElementById('topupBtn').addEventListener('click', () => {
       tg.openTelegramLink('https://t.me/' + BOT_USERNAME + '?start=topup');
     });
+
+    // === АРЕНА ===
+    // Адрес сервера бота (через ngrok туннель)
+    const ARENA_API = 'https://linguist-cloud-manned.ngrok-free.dev/api/arena';
+    const USER_ID = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
+
+    let selectedBet = 100;
+    let arenaRefreshTimer = null;
+    let myUserId = USER_ID;
+
+    // Получаем данные Telegram пользователя
+    function getNick() {
+      try {
+        const u = tg.initDataUnsafe.user;
+        return u.first_name || 'Игрок';
+      } catch (e) { return 'Игрок'; }
+    }
+
+    // Открыть экран арены (правильно — переключаем, сохраняя nav.html)
+    function openArenaScreen() {
+      document.querySelector('.main').style.display = 'none';
+      document.querySelector('.bottom-nav').style.display = 'none';
+      document.querySelector('.top-bar').style.display = 'none';
+      document.getElementById('arenaScreen').style.display = 'flex';
+      refreshArena();
+      arenaRefreshTimer = setInterval(refreshArena, 3000);
+    }
+    function closeArenaScreen() {
+      document.getElementById('arenaScreen').style.display = 'none';
+      document.querySelector('.main').style.display = '';
+      document.querySelector('.bottom-nav').style.display = '';
+      document.querySelector('.top-bar').style.display = '';
+      if (arenaRefreshTimer) { clearInterval(arenaRefreshTimer); arenaRefreshTimer = null; }
+    }
+
+    // Запрос состояния арены
+    async function refreshArena() {
+      try {
+        const res = await fetch(ARENA_API);
+        const data = await res.json();
+        document.getElementById('arenaBank').textContent = data.bank || 0;
+        document.getElementById('arenaPlayers').textContent = data.players || 0;
+        const listEl = document.getElementById('arenaPlayersList');
+        if (data.entries && data.entries.length > 0) {
+          listEl.innerHTML = data.entries.map((e) =>
+            '• ' + e.username + ': ' + e.bet + ' ⭐'
+          ).join('<br>');
+        } else {
+          listEl.innerHTML = 'Пока никто не поставил';
+        }
+      } catch (e) {
+        console.error('refreshArena error', e);
+      }
+    }
+
+    // Выбор суммы ставки
+    document.querySelectorAll('.bet-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bet-btn').forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedBet = Number(btn.dataset.bet);
+      });
+    });
+
+    // Кнопка "В игру"
+    document.getElementById('arenaPlaceBet').addEventListener('click', async () => {
+      const statusEl = document.getElementById('arenaStatus');
+      try {
+        const res = await fetch(ARENA_API + '/bet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: myUserId, bet: selectedBet })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          statusEl.innerHTML = '✅ Ты в игре на ' + selectedBet + ' ⭐!<br>Баланс: ' + data.balance + ' ⭐';
+          document.getElementById('balanceValue').textContent = data.balance;
+          refreshArena();
+        } else {
+          statusEl.innerHTML = '❌ ' + (data.error || 'Ошибка');
+        }
+      } catch (e) {
+        statusEl.innerHTML = '❌ Нет связи с сервером';
+      }
+    });
+
+    // Переход на экран арены из карточки
+    document.querySelectorAll('[data-open="arena"]').forEach((el) => {
+      el.addEventListener('click', openArenaScreen);
+    });
+    document.getElementById('arenaBack').addEventListener('click', closeArenaScreen);
   </script>
 </body>
 </html>
