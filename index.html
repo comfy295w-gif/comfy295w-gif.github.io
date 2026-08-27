@@ -188,7 +188,7 @@
 <body>
   <!-- Верх: баланс + аватар -->
   <div class="top-bar">
-    <button class="balance" id="topupBtn"><span class="stars-icon">⭐</span> 100 <span class="plus">+</span></button>
+    <button class="balance" id="topupBtn"><span class="stars-icon">⭐</span> <span id="balanceValue">0</span> <span class="plus">+</span></button>
     <div class="profile-mini">😎</div>
   </div>
 
@@ -269,6 +269,17 @@
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
+
+    // Берём баланс из URL (?balance=...), который передал бот
+    const params = new URLSearchParams(window.location.search);
+    const balanceCount = parseInt(params.get('balance') || '0', 10);
+    document.getElementById('balanceValue').textContent = isNaN(balanceCount) ? 0 : balanceCount;
+
+    // Показываем имя пользователя в профиле (уголок)
+    try {
+      const firstName = tg.initDataUnsafe.user.first_name || 'Игрок';
+      document.querySelector('.profile-mini').textContent = (firstName[0] || 'И').toUpperCase();
+    } catch (e) {}
 
     // Переключение вкладок Игры / Подарки
     const tabs = document.querySelectorAll('.tab');
