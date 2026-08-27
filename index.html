@@ -537,6 +537,7 @@
     let lastWheelKey = '';    // признак, что состав участников не менялся
     let sliceCount = 0;       // сколько секторов на колесе
     let sliceMids = [];       // середины секторов (для приземления на победителя)
+    let sliceMeta = [];       // границы секторов { start, end, mid } для случайного приземления
 
     // Точка на окружности (угол в градусах, 0 = право, дальше по часовой)
     function wheelPoint(deg, r) {
@@ -556,6 +557,7 @@
       const n = players.length;
       const totalBet = players.reduce((s, p) => s + (Number(p.bet) || 0), 0);
       const mids = [];
+      const meta = [];
       let slices = '', avatars = '';
       let s0 = 0;
       players.forEach((p, i) => {
@@ -564,6 +566,7 @@
         const span = Math.max(0.5, s1 - s0);
         const cm = s0 + span / 2;
         mids.push(cm);
+        meta.push({ start: s0, end: s1, mid: cm });
         const p0 = wheelPoint(s0, WHEEL_R), p1 = wheelPoint(s1, WHEEL_R);
         const large = span > 180 ? 1 : 0;
         slices += '<path d="M' + WHEEL_CX + ' ' + WHEEL_CY + ' L' + p0.x + ' ' + p0.y +
@@ -581,6 +584,7 @@
         s0 = s1;
       });
       sliceMids = mids;
+      sliceMeta = meta;
       return '<svg viewBox="0 0 200 200">' +
         '<g id="wheelGroup">' + slices + avatars + '</g>' +
         '<circle cx="100" cy="100" r="46" fill="#0f1220" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
@@ -648,10 +652,13 @@
       const roundEntries = (data.roundEntries || data.entries || []).slice(0, 8);
       const idx = roundEntries.findIndex((e) => e.userId === data.winner.userId);
       if (idx < 0) { resetWheel(); return; }
-      // Центр сектора-победителя (направление 12 часов в этой системе = 270°)
-      const ci = (sliceMids && sliceMids.length === sliceCount && sliceMids[idx] !== undefined)
-        ? sliceMids[idx]
-        : (idx + 0.5) * (360 / sliceCount);
+      // Случайная точка внутри сектора победителя: стрелка останавливается не ровно на профиле
+      const m = sliceMeta[idx];
+      const ci = m
+        ? m.start + Math.random() * (m.end - m.start)
+        : (sliceMids && sliceMids[idx] !== undefined
+            ? sliceMids[idx]
+            : (idx + 0.5) * (360 / sliceCount));
       const base = ((270 - ci) % 360 + 360) % 360;
       // Плюс несколько полных оборотов, чтобы колесо проехало вперёд от текущей позиции
       const k = Math.max(2, Math.floor((wheelAngle - base) / 360) + 3);
