@@ -500,10 +500,9 @@
       const wrap = document.getElementById('arenaWheelWrap');
       const players = (data.entries || []).slice(0, 8);
       if (players.length === 0) {
-        wrap.style.display = 'none';
+        wheel.innerHTML = '<div class="wheel-seg" style="background:#333;min-width:100%;color:var(--muted);justify-content:center;">Ждём участников...</div>';
         return;
       }
-      wrap.style.display = '';
       const segWidthPx = (100 / Math.max(players.length, 2)) * 40;
       const reps = Math.max(players.length, 2) * 4;
       const seq = [];
