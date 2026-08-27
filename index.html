@@ -199,21 +199,43 @@
     }
 
     /* === Рулетка фортуны === */
-    .arena-wheel-wrap { text-align: center; margin-bottom: 16px; }
-    .wheel-arrow { font-size: 24px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+    .arena-wheel-wrap { text-align: center; margin-bottom: 16px; position: relative; padding-top: 4px; }
+    .wheel-needle {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 13px solid transparent;
+      border-right: 13px solid transparent;
+      border-top: 20px solid var(--gold);
+      z-index: 30; pointer-events: none;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.55));
+    }
     .arena-wheel {
-      width: 100%; height: 56px; border-radius: 14px;
+      width: 100%; height: 74px; border-radius: 16px;
       background: var(--card); border: 1px solid var(--card-border);
       overflow: hidden; position: relative; display: flex;
       will-change: transform;
     }
     .wheel-seg {
-      flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap;
-      overflow: hidden; padding: 0 10px; border-right: 2px solid rgba(255,255,255,0.25);
+      flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 5px; color: #fff; white-space: nowrap;
+      overflow: hidden; padding: 6px 8px; border-right: 2px solid rgba(255,255,255,0.3);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.45);
     }
-    .arena-wheel.spinning {
-      transition: none;
+    .wheel-seg .w-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      object-fit: cover; border: 2px solid rgba(255,255,255,0.45);
+      background: rgba(0,0,0,0.25); flex-shrink: 0;
+    }
+    .wheel-seg .w-name {
+      max-width: 100px; font-size: 11px; font-weight: 700;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .wheel-seg.winner {
+      animation: winnerPulse 0.9s ease-in-out infinite;
+    }
+    @keyframes winnerPulse {
+      0%, 100% { box-shadow: inset 0 0 0 3px var(--gold), 0 0 10px rgba(255,215,0,0.6); }
+      50% { box-shadow: inset 0 0 0 3px #fff, 0 0 24px rgba(255,215,0,1); }
     }
     .arena-wheel.glow { box-shadow: 0 0 18px rgba(255,215,0,0.5); }
     .wheel-btn {
@@ -340,7 +362,7 @@
 
       <!-- Рулетка фортуны -->
       <div class="arena-wheel-wrap" id="arenaWheelWrap">
-        <div class="wheel-arrow">▼</div>
+        <div class="wheel-needle"></div>
         <div class="arena-wheel" id="arenaWheel">
           <div class="wheel-seg" style="background:#ff6b6b;min-width:130px;"> </div>
           <div class="wheel-seg" style="background:#38ef7d;min-width:130px;"> </div>
@@ -501,19 +523,23 @@
     let lastTapeKey = '';     // признак, что состав участников не менялся
     let tape = null;          // { html, segW, tapeWidth } построенная лента
 
-    // Строим ленту: несколько повторений списка игроков из фиксированных секторов
+    // Строим ленту: несколько повторений списка игроков из фиксированных секторов с аватарками
     function buildTape(players) {
       const segW = 150;
       const reps = Math.max(3, Math.ceil(1600 / (segW * players.length)));
       const seq = [];
       for (let r = 0; r < reps; r++) {
         for (let i = 0; i < players.length; i++) {
+          const name = players[i].name || players[i].username || 'Игрок';
           seq.push(
-            '<div class="wheel-seg" style="background:' + WHEEL_COLORS[i % WHEEL_COLORS.length] + ';min-width:' + segW + 'px;">' + (players[i].name || players[i].username || 'Игрок') + '</div>'
+            '<div class="wheel-seg" style="background:' + WHEEL_COLORS[i % WHEEL_COLORS.length] + ';min-width:' + segW + 'px;" data-userid="' + players[i].userId + '">' +
+              '<img class="w-avatar" src="https://t.me/i/userpic/320/' + players[i].userId + '.jpg" alt="' + name + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
+              '<span class="w-name">' + name + '</span>' +
+            '</div>'
           );
         }
       }
-      return { html: seq.join(''), segW: segW, tapeWidth: segW * players.length * reps };
+      return { html: seq.join(''), segW: segW, tapeWidth: segW * players.length * reps, count: players.length * reps };
     }
 
     // Отрисовка колеса (перестраиваем ленту только если изменился состав участников)
@@ -570,6 +596,13 @@
       if (wheelTicker) { cancelAnimationFrame(wheelTicker); wheelTicker = null; }
     }
 
+    // Убираем подсветку победителя, если она осталась с прошлого раунда
+    function clearWinnerHighlight() {
+      const wheel = document.getElementById('arenaWheel');
+      const segs = wheel.querySelectorAll('.wheel-seg.winner');
+      segs.forEach((s) => s.classList.remove('winner'));
+    }
+
     // Плавно приземляем колесо на победителя (стрелка указывает на его сектор)
     function landOnWinner(data) {
       stopSpin();
@@ -578,6 +611,7 @@
       const idx = roundEntries.findIndex((e) => e.userId === data.winner.userId);
       if (idx < 0) { resetWheel(); return; }
       const wheel = document.getElementById('arenaWheel');
+      clearWinnerHighlight();
       const containerWidth = wheel.parentElement.clientWidth || window.innerWidth || 375;
       const seg = tape.segW;
       const Tw = tape.tapeWidth;
@@ -588,6 +622,10 @@
       wheel.style.transition = 'transform 2.6s cubic-bezier(0.12, 0.75, 0.2, 1)';
       wheel.style.transform = 'translateX(-' + targetOffset + 'px)';
       wheel.classList.add('glow');
+
+      // Подсвечиваем сектор победителя, который окажется под стрелкой
+      const winnerSeg = wheel.children[(extra * roundEntries.length + idx) % tape.count];
+      if (winnerSeg) winnerSeg.classList.add('winner');
     }
 
     function resetWheel() {
@@ -605,15 +643,18 @@
       const label = document.getElementById('wheelSpinLabel');
       const result = document.getElementById('wheelResult');
       if (data.status === 'spinning') {
+        clearWinnerHighlight();
         startSpin();
         label.textContent = '🎰 Фортуна крутится...';
         result.style.display = 'none';
       } else if (data.status === 'done' && data.winner) {
         landOnWinner(data);
-        label.textContent = 'Раунд завершён';
+        const wName = data.winner.username || data.winner.name || 'Игрок';
+        label.textContent = '🎯 Остановился на: ' + wName;
         result.style.display = '';
-        result.innerHTML = '🏆 Победитель: <b>' + (data.winner.username || data.winner.name || 'Игрок') + '</b> забирает весь банк ' + data.lastBank + ' ⭐!';
+        result.innerHTML = '🏆 Победитель: <b>' + wName + '</b> забирает весь банк ' + data.lastBank + ' ⭐!';
       } else if (data.status === 'idle') {
+        clearWinnerHighlight();
         resetWheel();
         label.textContent = 'Сделай ставку, чтобы начать';
         // Убираем результат через пару секунд после нового раунда
