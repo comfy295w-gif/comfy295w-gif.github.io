@@ -174,6 +174,17 @@
     .arena-bank-sub { color: var(--muted); font-size: 13px; margin-top: 6px; }
     .arena-players-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .arena-players { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; margin-bottom: 18px; }
+    .arena-player {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .arena-player:last-child { border-bottom: none; }
+    .arena-player-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      object-fit: cover; background: var(--card-border); flex-shrink: 0;
+    }
+    .arena-player-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .arena-player-bet { font-size: 14px; font-weight: 700; color: var(--gold); }
     .arena-bet-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
     .arena-bet-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
     .bet-btn {
@@ -194,13 +205,22 @@
       width: 100%; height: 56px; border-radius: 14px;
       background: var(--card); border: 1px solid var(--card-border);
       overflow: hidden; position: relative; display: flex;
+      will-change: transform;
     }
     .wheel-seg {
-      flex: 1; display: flex; align-items: center; justify-content: center;
+      flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
       font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap;
-      overflow: hidden; padding: 0 4px;
+      overflow: hidden; padding: 0 10px; border-right: 2px solid rgba(255,255,255,0.25);
     }
-    .arena-wheel.spinning { transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .arena-wheel.spinning {
+      transition: transform 3.2s cubic-bezier(0.15, 0.75, 0.2, 1);
+      animation: wheelShake 0.3s linear infinite;
+    }
+    @keyframes wheelShake {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(2px); }
+    }
+    .arena-wheel.glow { box-shadow: 0 0 18px rgba(255,215,0,0.5); }
     .wheel-btn {
       margin-top: 8px; padding: 10px 0; border-radius: 12px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -453,8 +473,12 @@
         const listEl = document.getElementById('arenaPlayersList');
         if (data.entries && data.entries.length > 0) {
           listEl.innerHTML = data.entries.map((e) =>
-            '• ' + e.username + ': ' + e.bet + ' ⭐'
-          ).join('<br>');
+            '<div class="arena-player">' +
+              '<img class="arena-player-avatar" src="https://t.me/i/userpic/320/' + e.userId + '.jpg" alt="" onerror="this.style.visibility=\'hidden\'">' +
+              '<span class="arena-player-name">' + (e.name || e.username || 'Игрок') + '</span>' +
+              '<span class="arena-player-bet">' + e.bet + ' ⭐</span>' +
+            '</div>'
+          ).join('');
         } else {
           listEl.innerHTML = 'Пока никто не поставил';
         }
@@ -470,7 +494,7 @@
     const WHEEL_COLORS = ['#ff6b6b', '#38ef7d', '#7c5cff', '#ffd700', '#00d4ff', '#ff8e53', '#a18cd1', '#f38efd'];
     let wasSpinning = false;
 
-    // Отрисовка секторов рулетки по участникам
+    // Отрисовка секторов рулетки по участникам (лента из повторов для плавного вращения)
     function renderWheel(data) {
       const wheel = document.getElementById('arenaWheel');
       const wrap = document.getElementById('arenaWheelWrap');
@@ -480,10 +504,17 @@
         return;
       }
       wrap.style.display = '';
-      const segWidthPx = (100 / players.length) * 40;
-      wheel.innerHTML = players.map((p, i) =>
-        '<div class="wheel-seg" style="background:' + WHEEL_COLORS[i % WHEEL_COLORS.length] + ';min-width:' + segWidthPx + 'px;">' + p.username + '</div>'
-      ).join('');
+      const segWidthPx = (100 / Math.max(players.length, 2)) * 40;
+      const reps = Math.max(players.length, 2) * 4;
+      const seq = [];
+      for (let r = 0; r < reps; r++) {
+        for (let i = 0; i < players.length; i++) {
+          seq.push(
+            '<div class="wheel-seg" style="background:' + WHEEL_COLORS[i % WHEEL_COLORS.length] + ';min-width:' + segWidthPx + 'px;">' + players[i].username + '</div>'
+          );
+        }
+      }
+      wheel.innerHTML = seq.join('');
     }
 
     // Управление состоянием рулетки (спин / результат)
@@ -506,12 +537,14 @@
         wasSpinning = false;
         wheel.classList.remove('spinning');
         wheel.style.transform = '';
+        wheel.classList.add('glow');
         result.style.display = '';
         result.innerHTML = '🏆 Победитель: <b>' + data.winner.username + '</b> забирает весь банк ' + data.lastBank + ' ⭐!';
         label.textContent = 'Раунд завершён';
       } else if (data.status === 'idle') {
         wasSpinning = false;
         wheel.classList.remove('spinning');
+        wheel.classList.remove('glow');
         wheel.style.transform = '';
         label.textContent = 'Сделай ставку, чтобы начать';
         // Убираем результат через пару секунд после нового раунда
@@ -537,7 +570,12 @@
         const res = await fetch(ARENA_API + '/bet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-          body: JSON.stringify({ userId: myUserId, bet: selectedBet })
+          body: JSON.stringify({
+            userId: myUserId,
+            bet: selectedBet,
+            username: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '',
+            firstName: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || '') : ''
+          })
         });
         const data = await res.json();
         if (data.ok) {
