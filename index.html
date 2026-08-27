@@ -187,6 +187,31 @@
       color: #fff; font-size: 17px; font-weight: 700; cursor: pointer;
     }
 
+    /* === Рулетка фортуны === */
+    .arena-wheel-wrap { text-align: center; margin-bottom: 16px; }
+    .wheel-arrow { font-size: 24px; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+    .arena-wheel {
+      width: 100%; height: 56px; border-radius: 14px;
+      background: var(--card); border: 1px solid var(--card-border);
+      overflow: hidden; position: relative; display: flex;
+    }
+    .wheel-seg {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap;
+      overflow: hidden; padding: 0 4px;
+    }
+    .arena-wheel.spinning { transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .wheel-btn {
+      margin-top: 8px; padding: 10px 0; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-weight: 700; font-size: 15px;
+    }
+    .wheel-result {
+      text-align: center; padding: 14px; border-radius: 14px; margin-bottom: 16px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2));
+      border: 1px solid rgba(255,215,0,0.4); font-weight: 700; font-size: 16px;
+    }
+
     /* === Нижняя панель навигации === */
     .bottom-nav {
       position: fixed;
@@ -297,6 +322,14 @@
         <div class="arena-bank-amount"><span id="arenaBank">0</span> ⭐</div>
         <div class="arena-bank-sub">Участников: <span id="arenaPlayers">0</span></div>
       </div>
+
+      <!-- Рулетка фортуны -->
+      <div class="arena-wheel-wrap" id="arenaWheelWrap">
+        <div class="wheel-arrow">▼</div>
+        <div class="arena-wheel" id="arenaWheel"></div>
+        <div class="wheel-btn" id="wheelSpinLabel">🎰 Крутится...</div>
+      </div>
+      <div id="wheelResult" class="wheel-result" style="display:none;"></div>
 
       <div class="arena-players">
         <div class="arena-players-title">Участники</div>
@@ -425,8 +458,66 @@
         } else {
           listEl.innerHTML = 'Пока никто не поставил';
         }
+
+        renderWheel(data);
+        handleWheelStatus(data);
       } catch (e) {
         console.error('refreshArena error', e);
+      }
+    }
+
+    // Цвета секторов рулетки
+    const WHEEL_COLORS = ['#ff6b6b', '#38ef7d', '#7c5cff', '#ffd700', '#00d4ff', '#ff8e53', '#a18cd1', '#f38efd'];
+    let wasSpinning = false;
+
+    // Отрисовка секторов рулетки по участникам
+    function renderWheel(data) {
+      const wheel = document.getElementById('arenaWheel');
+      const wrap = document.getElementById('arenaWheelWrap');
+      const players = (data.entries || []).slice(0, 8);
+      if (players.length === 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+      wrap.style.display = '';
+      const segWidthPx = (100 / players.length) * 40;
+      wheel.innerHTML = players.map((p, i) =>
+        '<div class="wheel-seg" style="background:' + WHEEL_COLORS[i % WHEEL_COLORS.length] + ';min-width:' + segWidthPx + 'px;">' + p.username + '</div>'
+      ).join('');
+    }
+
+    // Управление состоянием рулетки (спин / результат)
+    function handleWheelStatus(data) {
+      const wrap = document.getElementById('arenaWheelWrap');
+      const wheel = document.getElementById('arenaWheel');
+      const result = document.getElementById('wheelResult');
+      const label = document.getElementById('wheelSpinLabel');
+
+      if (data.status === 'spinning') {
+        if (!wasSpinning) {
+          wasSpinning = true;
+          wheel.classList.add('spinning');
+          // Крутим на пару оборотов
+          wheel.style.transform = 'translateX(-' + (data.entries.length * 20) + 'px) rotate(0.01deg)';
+          label.textContent = '🎰 Фортуна крутится...';
+          result.style.display = 'none';
+        }
+      } else if (data.status === 'done' && data.winner) {
+        wasSpinning = false;
+        wheel.classList.remove('spinning');
+        wheel.style.transform = '';
+        result.style.display = '';
+        result.innerHTML = '🏆 Победитель: <b>' + data.winner.username + '</b> забирает весь банк ' + data.lastBank + ' ⭐!';
+        label.textContent = 'Раунд завершён';
+      } else if (data.status === 'idle') {
+        wasSpinning = false;
+        wheel.classList.remove('spinning');
+        wheel.style.transform = '';
+        label.textContent = 'Сделай ставку, чтобы начать';
+        // Убираем результат через пару секунд после нового раунда
+        if (data.players === 0) {
+          result.style.display = 'none';
+        }
       }
     }
 
