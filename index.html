@@ -181,7 +181,13 @@
     .arena-player:last-child { border-bottom: none; }
     .arena-player-avatar {
       width: 38px; height: 38px; border-radius: 50%;
-      object-fit: cover; background: var(--card-border); flex-shrink: 0;
+      object-fit: cover; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      position: relative; flex-shrink: 0; overflow: hidden;
+    }
+    .arena-player-avatar .a-initial { font-weight: 700; color: #fff; font-size: 16px; }
+    .arena-player-avatar img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     }
     .arena-player-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .arena-player-bet { font-size: 14px; font-weight: 700; color: var(--gold); }
@@ -192,6 +198,15 @@
       padding: 16px 0; border-radius: 14px; font-size: 18px; font-weight: 700; cursor: pointer;
     }
     .bet-btn.selected { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; }
+    .bet-custom { grid-column: 1 / -1; }
+    .bet-custom input {
+      width: 100%; padding: 14px 16px; border-radius: 14px;
+      background: var(--card); border: 1px solid var(--card-border);
+      color: var(--text); font-size: 16px; font-weight: 700; text-align: center;
+      outline: none; font-family: inherit;
+    }
+    .bet-custom input:focus { border-color: var(--accent); }
+    .bet-custom input::placeholder { color: var(--muted); font-weight: 600; font-size: 14px; }
     .arena-play-btn {
       width: 100%; padding: 16px 0; border: none; border-radius: 16px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -372,6 +387,9 @@
         <button class="bet-btn" data-bet="250">250</button>
         <button class="bet-btn" data-bet="500">500</button>
         <button class="bet-btn" data-bet="1000">1000</button>
+        <div class="bet-custom">
+          <input type="number" id="customBet" min="50" max="100000" placeholder="Своя сумма (от 50 до 100000) ⭐">
+        </div>
       </div>
       <button class="arena-play-btn" id="arenaPlaceBet">🎯 В игру</button>
       <div id="arenaStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:12px;"></div>
@@ -483,13 +501,17 @@
         const listEl = document.getElementById('arenaPlayersList');
         const entries = data.roundEntries || data.entries || [];
         if (entries.length > 0) {
-          listEl.innerHTML = entries.map((e) =>
-            '<div class="arena-player">' +
-              '<img class="arena-player-avatar" src="https://t.me/i/userpic/320/' + e.userId + '.jpg" alt="" onerror="this.style.visibility=\'hidden\'">' +
-              '<span class="arena-player-name">' + (e.name || e.username || 'Игрок') + '</span>' +
+          listEl.innerHTML = entries.map((e) => {
+            const nm = e.name || e.username || 'Игрок';
+            const initial = (nm.trim().charAt(0) || '?').toUpperCase();
+            return '<div class="arena-player">' +
+              '<div class="arena-player-avatar"><span class="a-initial">' + initial + '</span>' +
+                '<img src="https://t.me/i/userpic/320/' + e.userId + '.jpg" alt="" loading="lazy" onerror="this.remove()">' +
+              '</div>' +
+              '<span class="arena-player-name">' + nm + '</span>' +
               '<span class="arena-player-bet">' + e.bet + ' ⭐</span>' +
-            '</div>'
-          ).join('');
+            '</div>';
+          }).join('');
         } else {
           listEl.innerHTML = 'Пока никто не поставил';
         }
@@ -514,6 +536,7 @@
     let landingLock = null;   // { winnerUserId, target } на кого уже приземляемся
     let lastWheelKey = '';    // признак, что состав участников не менялся
     let sliceCount = 0;       // сколько секторов на колесе
+    let sliceMids = [];       // середины секторов (для приземления на победителя)
 
     // Точка на окружности (угол в градусах, 0 = право, дальше по часовой)
     function wheelPoint(deg, r) {
@@ -521,7 +544,7 @@
       return { x: WHEEL_CX + r * Math.cos(a), y: WHEEL_CY + r * Math.sin(a) };
     }
 
-    // Круговое колесо с аватарками игроков
+    // Круговое колесо: размер сектора пропорционален ставке, на секторе аватарка игрока
     function buildWheelHtml(players) {
       if (players.length === 0) {
         return '<svg viewBox="0 0 200 200">' +
@@ -531,24 +554,33 @@
         '</svg>';
       }
       const n = players.length;
-      const sa = 360 / n;
+      const totalBet = players.reduce((s, p) => s + (Number(p.bet) || 0), 0);
+      const mids = [];
       let slices = '', avatars = '';
+      let s0 = 0;
       players.forEach((p, i) => {
-        const s0 = i * sa, s1 = (i + 1) * sa;
+        const frac = totalBet > 0 ? (Number(p.bet) || 0) / totalBet : 1 / n;
+        let s1 = (i === n - 1) ? 360 : Math.min(360 - 0.001, s0 + 360 * frac); // последний закрывает круг
+        const span = Math.max(0.5, s1 - s0);
+        const cm = s0 + span / 2;
+        mids.push(cm);
         const p0 = wheelPoint(s0, WHEEL_R), p1 = wheelPoint(s1, WHEEL_R);
-        const large = sa > 180 ? 1 : 0;
+        const large = span > 180 ? 1 : 0;
         slices += '<path d="M' + WHEEL_CX + ' ' + WHEEL_CY + ' L' + p0.x + ' ' + p0.y +
           ' A' + WHEEL_R + ' ' + WHEEL_R + ' 0 ' + large + ' 1 ' + p1.x + ' ' + p1.y + ' Z" ' +
           'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(15,18,32,0.85)" stroke-width="3" data-idx="' + i + '"/>';
-        const cm = (s0 + s1) / 2;
         const av = wheelPoint(cm, WHEEL_AVR);
+        const initial = (((p.name || p.username || 'Игрок').trim().charAt(0)) || '?').toUpperCase();
         avatars +=
           '<g class="wheel-avatar" data-idx="' + i + '">' +
-            '<clipPath id="wclip' + i + '"><circle cx="' + av.x + '" cy="' + av.y + '" r="' + AVATAR_R + '"/></clipPath>' +
-            '<circle class="w-ring" cx="' + av.x + '" cy="' + av.y + '" r="' + AVATAR_R + '" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>' +
-            '<image href="https://t.me/i/userpic/320/' + p.userId + '.jpg" x="' + (av.x - AVATAR_R) + '" y="' + (av.y - AVATAR_R) + '" width="' + (2 * AVATAR_R) + '" height="' + (2 * AVATAR_R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#wclip' + i + ')" />' +
+            '<clipPath id="wclip' + i + '"><circle cx="' + av.x.toFixed(2) + '" cy="' + av.y.toFixed(2) + '" r="' + AVATAR_R + '"/></clipPath>' +
+            '<circle class="w-ring" cx="' + av.x.toFixed(2) + '" cy="' + av.y.toFixed(2) + '" r="' + AVATAR_R + '" fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>' +
+            '<text class="w-initial" x="' + av.x.toFixed(2) + '" y="' + (av.y + 7).toFixed(2) + '" text-anchor="middle" font-size="19" font-weight="700" fill="#fff" font-family="inherit">' + initial + '</text>' +
+            '<image href="https://t.me/i/userpic/320/' + p.userId + '.jpg" x="' + (av.x - AVATAR_R) + '" y="' + (av.y - AVATAR_R) + '" width="' + (2 * AVATAR_R) + '" height="' + (2 * AVATAR_R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#wclip' + i + ')" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'"></image>' +
           '</g>';
+        s0 = s1;
       });
+      sliceMids = mids;
       return '<svg viewBox="0 0 200 200">' +
         '<g id="wheelGroup">' + slices + avatars + '</g>' +
         '<circle cx="100" cy="100" r="46" fill="#0f1220" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
@@ -565,7 +597,7 @@
     function renderWheel(data) {
       const wheel = document.getElementById('arenaWheel');
       const players = (data.roundEntries || data.entries || []).slice(0, 8);
-      const key = players.map((p) => p.userId).join(',');
+      const key = players.map((p) => p.userId + ':' + p.bet).join(',');
       if (key !== lastWheelKey) {
         lastWheelKey = key;
         sliceCount = players.length;
@@ -617,7 +649,9 @@
       const idx = roundEntries.findIndex((e) => e.userId === data.winner.userId);
       if (idx < 0) { resetWheel(); return; }
       // Центр сектора-победителя (направление 12 часов в этой системе = 270°)
-      const ci = (idx + 0.5) * (360 / sliceCount);
+      const ci = (sliceMids && sliceMids.length === sliceCount && sliceMids[idx] !== undefined)
+        ? sliceMids[idx]
+        : (idx + 0.5) * (360 / sliceCount);
       const base = ((270 - ci) % 360 + 360) % 360;
       // Плюс несколько полных оборотов, чтобы колесо проехало вперёд от текущей позиции
       const k = Math.max(2, Math.floor((wheelAngle - base) / 360) + 3);
@@ -686,32 +720,62 @@
       }
     }
 
-    // Выбор суммы ставки
+    // Выбор суммы ставки (пресеты или своя сумма)
+    const MIN_BET = 50;
+    const MAX_BET = 100000;
+
+    function getSelectedBet() {
+      const custom = document.getElementById('customBet');
+      if (custom && custom.value) {
+        const v = parseInt(custom.value, 10);
+        if (!isNaN(v) && v > 0) return v;
+      }
+      return selectedBet;
+    }
+
     document.querySelectorAll('.bet-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.bet-btn').forEach((b) => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedBet = Number(btn.dataset.bet);
+        const custom = document.getElementById('customBet');
+        if (custom) custom.value = '';
       });
     });
+
+    const customBetInput = document.getElementById('customBet');
+    if (customBetInput) {
+      customBetInput.addEventListener('input', () => {
+        const v = parseInt(customBetInput.value, 10);
+        if (!isNaN(v) && v > 0) {
+          selectedBet = v;
+          document.querySelectorAll('.bet-btn').forEach((b) => b.classList.remove('selected'));
+        }
+      });
+    }
 
     // Кнопка "В игру"
     document.getElementById('arenaPlaceBet').addEventListener('click', async () => {
       const statusEl = document.getElementById('arenaStatus');
+      const amount = getSelectedBet();
+      if (!amount || amount < MIN_BET || amount > MAX_BET) {
+        statusEl.innerHTML = '⚠️ Введи сумму от ' + MIN_BET + ' до ' + MAX_BET + ' ⭐';
+        return;
+      }
       try {
         const res = await fetch(ARENA_API + '/bet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
           body: JSON.stringify({
             userId: myUserId,
-            bet: selectedBet,
+            bet: amount,
             username: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '',
             firstName: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || '') : ''
           })
         });
         const data = await res.json();
         if (data.ok) {
-          statusEl.innerHTML = '✅ Ты в игре на ' + selectedBet + ' ⭐!<br>Баланс: ' + data.balance + ' ⭐';
+          statusEl.innerHTML = '✅ Ты в игре на ' + amount + ' ⭐!<br>Баланс: ' + data.balance + ' ⭐';
           document.getElementById('balanceValue').textContent = data.balance;
           refreshArena();
         } else {
