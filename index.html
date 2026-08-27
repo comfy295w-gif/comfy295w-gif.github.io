@@ -411,7 +411,9 @@
     // Запрос состояния арены
     async function refreshArena() {
       try {
-        const res = await fetch(ARENA_API);
+        const res = await fetch(ARENA_API, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
         const data = await res.json();
         document.getElementById('arenaBank').textContent = data.bank || 0;
         document.getElementById('arenaPlayers').textContent = data.players || 0;
@@ -443,7 +445,7 @@
       try {
         const res = await fetch(ARENA_API + '/bet', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
           body: JSON.stringify({ userId: myUserId, bet: selectedBet })
         });
         const data = await res.json();
