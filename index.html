@@ -49,6 +49,23 @@
       gap: 8px;
       font-size: 16px;
       font-weight: 700;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .balance:active { transform: scale(0.95); }
+    .balance .plus {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
     }
     .stars-icon {
       color: var(--gold);
@@ -171,7 +188,7 @@
 <body>
   <!-- Верх: баланс + аватар -->
   <div class="top-bar">
-    <div class="balance"><span class="stars-icon">⭐</span> 100</div>
+    <button class="balance" id="topupBtn"><span class="stars-icon">⭐</span> 100 <span class="plus">+</span></button>
     <div class="profile-mini">😎</div>
   </div>
 
@@ -272,6 +289,12 @@
         navItems.forEach(n => n.classList.remove('active'));
         item.classList.add('active');
       });
+    });
+
+    // Кнопка пополнения звёздами
+    const BOT_USERNAME = 'freezegift_bot';
+    document.getElementById('topupBtn').addEventListener('click', () => {
+      tg.openTelegramLink('https://t.me/' + BOT_USERNAME + '?start=topup');
     });
   </script>
 </body>
