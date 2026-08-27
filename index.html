@@ -198,7 +198,7 @@
       color: #fff; font-size: 17px; font-weight: 700; cursor: pointer;
     }
 
-    /* === Рулетка фортуны === */
+    /* === Колесо фортуны (круглое) === */
     .arena-wheel-wrap { text-align: center; margin-bottom: 16px; position: relative; padding-top: 4px; }
     .wheel-needle {
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
@@ -210,34 +210,22 @@
       filter: drop-shadow(0 3px 5px rgba(0,0,0,0.55));
     }
     .arena-wheel {
-      width: 100%; height: 74px; border-radius: 16px;
-      background: var(--card); border: 1px solid var(--card-border);
-      overflow: hidden; position: relative; display: flex;
-      will-change: transform;
+      width: 100%; max-width: 300px; margin: 0 auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background: var(--card);
+      border: 3px solid rgba(255,215,0,0.55);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 0 22px rgba(0,0,0,0.35);
+      overflow: hidden; position: relative;
     }
-    .wheel-seg {
-      flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 5px; color: #fff; white-space: nowrap;
-      overflow: hidden; padding: 6px 8px; border-right: 2px solid rgba(255,255,255,0.3);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+    .arena-wheel svg { width: 100%; height: 100%; display: block; }
+    .arena-wheel.glow { box-shadow: 0 0 26px rgba(255,215,0,0.6), 0 8px 24px rgba(0,0,0,0.5); }
+    path.winner { filter: drop-shadow(0 0 6px rgba(255,215,0,0.9)); }
+    .wheel-avatar.winner .w-ring { animation: ringPulse 0.9s ease-in-out infinite; }
+    @keyframes ringPulse {
+      0%, 100% { stroke: var(--gold); stroke-width: 3px; }
+      50% { stroke: #ffffff; stroke-width: 2px; }
     }
-    .wheel-seg .w-avatar {
-      width: 40px; height: 40px; border-radius: 50%;
-      object-fit: cover; border: 2px solid rgba(255,255,255,0.45);
-      background: rgba(0,0,0,0.25); flex-shrink: 0;
-    }
-    .wheel-seg .w-name {
-      max-width: 100px; font-size: 11px; font-weight: 700;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .wheel-seg.winner {
-      animation: winnerPulse 0.9s ease-in-out infinite;
-    }
-    @keyframes winnerPulse {
-      0%, 100% { box-shadow: inset 0 0 0 3px var(--gold), 0 0 10px rgba(255,215,0,0.6); }
-      50% { box-shadow: inset 0 0 0 3px #fff, 0 0 24px rgba(255,215,0,1); }
-    }
-    .arena-wheel.glow { box-shadow: 0 0 18px rgba(255,215,0,0.5); }
     .wheel-btn {
       margin-top: 8px; padding: 10px 0; border-radius: 12px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -364,9 +352,10 @@
       <div class="arena-wheel-wrap" id="arenaWheelWrap">
         <div class="wheel-needle"></div>
         <div class="arena-wheel" id="arenaWheel">
-          <div class="wheel-seg" style="background:#ff6b6b;min-width:130px;"> </div>
-          <div class="wheel-seg" style="background:#38ef7d;min-width:130px;"> </div>
-          <div class="wheel-seg" style="background:#7c5cff;min-width:130px;"> </div>
+          <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="98" fill="#1a1f35"/>
+            <text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15">Ждём участников...</text>
+          </svg>
         </div>
         <div class="wheel-btn" id="wheelSpinLabel">🎰 Крутится...</div>
       </div>
@@ -512,80 +501,95 @@
       }
     }
 
-    // === Колёса фортуны ===
+    // === Колесо фортуны (круглое) ===
     // Цвета секторов рулетки
     const WHEEL_COLORS = ['#ff6b6b', '#38ef7d', '#7c5cff', '#ffd700', '#00d4ff', '#ff8e53', '#a18cd1', '#f38efd'];
 
-    // Лента колеса (порядок участников), которую крутим
-    let wheelOffset = 0;      // текущий сдвиг ленты в px
+    // Параметры колеса в SVG (viewBox 200x200)
+    const WHEEL_CX = 100, WHEEL_CY = 100, WHEEL_R = 98, WHEEL_INNER = 46, WHEEL_AVR = 74, AVATAR_R = 20;
+
+    let wheelAngle = 0;       // текущий угол поворота колеса (градусы)
     let wheelTicker = null;   // rAF-цикл непрерывного вращения
     let spinningFlag = false; // идёт ли непрерывное вращение
-    let lastTapeKey = '';     // признак, что состав участников не менялся
-    let tape = null;          // { html, segW, tapeWidth } построенная лента
+    let landingLock = null;   // { winnerUserId, target } на кого уже приземляемся
+    let lastWheelKey = '';    // признак, что состав участников не менялся
+    let sliceCount = 0;       // сколько секторов на колесе
 
-    // Строим ленту: несколько повторений списка игроков из фиксированных секторов с аватарками
-    function buildTape(players) {
-      const segW = 150;
-      const reps = Math.max(3, Math.ceil(1600 / (segW * players.length)));
-      const seq = [];
-      for (let r = 0; r < reps; r++) {
-        for (let i = 0; i < players.length; i++) {
-          const name = players[i].name || players[i].username || 'Игрок';
-          seq.push(
-            '<div class="wheel-seg" style="background:' + WHEEL_COLORS[i % WHEEL_COLORS.length] + ';min-width:' + segW + 'px;" data-userid="' + players[i].userId + '">' +
-              '<img class="w-avatar" src="https://t.me/i/userpic/320/' + players[i].userId + '.jpg" alt="' + name + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
-              '<span class="w-name">' + name + '</span>' +
-            '</div>'
-          );
-        }
-      }
-      return { html: seq.join(''), segW: segW, tapeWidth: segW * players.length * reps, count: players.length * reps };
+    // Точка на окружности (угол в градусах, 0 = право, дальше по часовой)
+    function wheelPoint(deg, r) {
+      const a = (deg * Math.PI) / 180;
+      return { x: WHEEL_CX + r * Math.cos(a), y: WHEEL_CY + r * Math.sin(a) };
     }
 
-    // Отрисовка колеса (перестраиваем ленту только если изменился состав участников)
+    // Круговое колесо с аватарками игроков
+    function buildWheelHtml(players) {
+      if (players.length === 0) {
+        return '<svg viewBox="0 0 200 200">' +
+          '<circle cx="100" cy="100" r="98" fill="#1a1f35"/>' +
+          '<circle cx="100" cy="100" r="98" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
+          '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15" font-family="inherit">Ждём участников...</text>' +
+        '</svg>';
+      }
+      const n = players.length;
+      const sa = 360 / n;
+      let slices = '', avatars = '';
+      players.forEach((p, i) => {
+        const s0 = i * sa, s1 = (i + 1) * sa;
+        const p0 = wheelPoint(s0, WHEEL_R), p1 = wheelPoint(s1, WHEEL_R);
+        const large = sa > 180 ? 1 : 0;
+        slices += '<path d="M' + WHEEL_CX + ' ' + WHEEL_CY + ' L' + p0.x + ' ' + p0.y +
+          ' A' + WHEEL_R + ' ' + WHEEL_R + ' 0 ' + large + ' 1 ' + p1.x + ' ' + p1.y + ' Z" ' +
+          'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(15,18,32,0.85)" stroke-width="3" data-idx="' + i + '"/>';
+        const cm = (s0 + s1) / 2;
+        const av = wheelPoint(cm, WHEEL_AVR);
+        avatars +=
+          '<g class="wheel-avatar" data-idx="' + i + '">' +
+            '<clipPath id="wclip' + i + '"><circle cx="' + av.x + '" cy="' + av.y + '" r="' + AVATAR_R + '"/></clipPath>' +
+            '<circle class="w-ring" cx="' + av.x + '" cy="' + av.y + '" r="' + AVATAR_R + '" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>' +
+            '<image href="https://t.me/i/userpic/320/' + p.userId + '.jpg" x="' + (av.x - AVATAR_R) + '" y="' + (av.y - AVATAR_R) + '" width="' + (2 * AVATAR_R) + '" height="' + (2 * AVATAR_R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#wclip' + i + ')" />' +
+          '</g>';
+      });
+      return '<svg viewBox="0 0 200 200">' +
+        '<g id="wheelGroup">' + slices + avatars + '</g>' +
+        '<circle cx="100" cy="100" r="46" fill="#0f1220" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
+        '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="22">🎰</text>' +
+      '</svg>';
+    }
+
+    function applyRotation() {
+      const g = document.getElementById('wheelGroup');
+      if (g) g.setAttribute('transform', 'rotate(' + wheelAngle + ' 100 100)');
+    }
+
+    // Отрисовка колеса (перестраиваем только если изменился состав участников)
     function renderWheel(data) {
       const wheel = document.getElementById('arenaWheel');
       const players = (data.roundEntries || data.entries || []).slice(0, 8);
-      if (players.length === 0) {
-        lastTapeKey = '';
-        tape = null;
-        wheel.style.transition = 'none';
-        wheel.style.transform = '';
-        wheel.classList.remove('glow');
-        wheel.innerHTML = '<div class="wheel-seg" style="background:#333;min-width:100%;width:100%;color:var(--muted);justify-content:center;">Ждём участников...</div>';
-        return;
-      }
       const key = players.map((p) => p.userId).join(',');
-      if (key !== lastTapeKey) {
-        lastTapeKey = key;
-        tape = buildTape(players);
-        wheel.innerHTML = tape.html;
+      if (key !== lastWheelKey) {
+        lastWheelKey = key;
+        sliceCount = players.length;
+        landingLock = null;
+        wheel.innerHTML = buildWheelHtml(players);
+        wheel.classList.remove('glow');
         stopSpin();
-        wheelOffset = 0;
-        wheel.style.transition = 'none';
-        wheel.style.transform = 'translateX(0)';
+        wheelAngle = 0;
+        applyRotation();
       }
     }
 
-    // Непрерывное вращение (симуляция, пока идёт розыгрыш)
+    // Непрерывное вращение
     function startSpin() {
-      if (spinningFlag || !tape) return;
+      if (spinningFlag || sliceCount === 0) return;
       spinningFlag = true;
-      const wheel = document.getElementById('arenaWheel');
-      wheel.classList.remove('glow');
-      wheel.style.transition = 'none';
-      const speed = 300; // px в секунду
+      const degPerSec = 130;
       let last = performance.now();
       const step = (now) => {
         if (!spinningFlag) return;
         const dt = (now - last) / 1000;
         last = now;
-        wheelOffset += speed * dt;
-        // Крутим по кругу: после почти полного оборота ленты уходим в начало
-        if (tape && tape.tapeWidth > 0 && wheelOffset > tape.tapeWidth - 900) {
-          wheelOffset -= tape.tapeWidth;
-        }
-        wheel.style.transform = 'translateX(-' + wheelOffset + 'px)';
+        wheelAngle = (wheelAngle + degPerSec * dt) % 360;
+        applyRotation();
         wheelTicker = requestAnimationFrame(step);
       };
       wheelTicker = requestAnimationFrame(step);
@@ -596,46 +600,64 @@
       if (wheelTicker) { cancelAnimationFrame(wheelTicker); wheelTicker = null; }
     }
 
-    // Убираем подсветку победителя, если она осталась с прошлого раунда
+    // Убираем подсветку победителя и замок приземления
     function clearWinnerHighlight() {
       const wheel = document.getElementById('arenaWheel');
-      const segs = wheel.querySelectorAll('.wheel-seg.winner');
+      const segs = wheel.querySelectorAll('.wheel-seg.winner, path.winner, .wheel-avatar.winner');
       segs.forEach((s) => s.classList.remove('winner'));
+      landingLock = null;
     }
 
-    // Плавно приземляем колесо на победителя (стрелка указывает на его сектор)
+    // Плавно приземляем колесо: сектор победителя останавливается под стрелкой (наверху)
     function landOnWinner(data) {
       stopSpin();
-      if (!tape) return;
+      if (sliceCount === 0) return;
+      if (landingLock && landingLock.winnerUserId === data.winner.userId) return; // уже приземляемся
       const roundEntries = (data.roundEntries || data.entries || []).slice(0, 8);
       const idx = roundEntries.findIndex((e) => e.userId === data.winner.userId);
       if (idx < 0) { resetWheel(); return; }
+      // Центр сектора-победителя (направление 12 часов в этой системе = 270°)
+      const ci = (idx + 0.5) * (360 / sliceCount);
+      const base = ((270 - ci) % 360 + 360) % 360;
+      // Плюс несколько полных оборотов, чтобы колесо проехало вперёд от текущей позиции
+      const k = Math.max(2, Math.floor((wheelAngle - base) / 360) + 3);
+      const target = base + k * 360;
+      landingLock = { winnerUserId: data.winner.userId, target: target };
+
+      // Подсветить сектор и аватарку победителя
       const wheel = document.getElementById('arenaWheel');
-      clearWinnerHighlight();
-      const containerWidth = wheel.parentElement.clientWidth || window.innerWidth || 375;
-      const seg = tape.segW;
-      const Tw = tape.tapeWidth;
-      // Лента так, чтобы центр сектора победителя оказался под стрелкой,
-      // и сделали ещё 2+ полных оборота относительно текущего положения
-      const extra = Math.max(2, Math.ceil((wheelOffset + containerWidth / 2) / Tw) + 2);
-      const targetOffset = (extra * Tw + idx * seg + seg / 2) - containerWidth / 2;
-      wheel.style.transition = 'transform 2.6s cubic-bezier(0.12, 0.75, 0.2, 1)';
-      wheel.style.transform = 'translateX(-' + targetOffset + 'px)';
+      const pathes = wheel.querySelectorAll('path[data-idx]');
+      pathes.forEach((p) => p.classList.toggle('winner', Number(p.dataset.idx) === idx));
+      const avs = wheel.querySelectorAll('.wheel-avatar[data-idx]');
+      avs.forEach((g) => g.classList.toggle('winner', Number(g.dataset.idx) === idx));
       wheel.classList.add('glow');
 
-      // Подсвечиваем сектор победителя, который окажется под стрелкой
-      const winnerSeg = wheel.children[(extra * roundEntries.length + idx) % tape.count];
-      if (winnerSeg) winnerSeg.classList.add('winner');
+      // Анимация приземления с замедлением
+      const from = wheelAngle;
+      const t0 = performance.now();
+      const duration = 2800;
+      const ease = (t) => 1 - Math.pow(1 - t, 3);
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / duration);
+        wheelAngle = from + (target - from) * ease(t);
+        applyRotation();
+        if (t < 1) {
+          wheelTicker = requestAnimationFrame(step);
+        } else {
+          wheelAngle = target;
+          applyRotation();
+        }
+      };
+      wheelTicker = requestAnimationFrame(step);
     }
 
     function resetWheel() {
-      if (!tape) return;
       stopSpin();
+      landingLock = null;
       const wheel = document.getElementById('arenaWheel');
-      wheel.style.transition = 'none';
-      wheel.style.transform = 'translateX(0)';
       wheel.classList.remove('glow');
-      wheelOffset = 0;
+      wheelAngle = 0;
+      applyRotation();
     }
 
     // Управление колесом по статусу арены
