@@ -518,6 +518,23 @@
     .mines-hist-item .mh-info { font-weight: 800; white-space: nowrap; }
     .mines-hist-item .mh-meta { color: var(--muted); font-size: 11px; white-space: nowrap; }
 
+    .mines-tab {
+      flex: 1; padding: 11px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06); color: var(--muted); font-weight: 700; font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .mines-tab.active {
+      background: linear-gradient(180deg, #3cff5e, #17a534); color: #000; border-color: transparent;
+      box-shadow: 0 0 18px rgba(60,255,94,0.35);
+    }
+    .mines-hist-item .mh-rank { font-weight: 800; font-size: 13px; min-width: 24px; text-align: center; }
+    .mines-hist-item .mh-ava {
+      width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08);
+    }
+    .mines-hist-item .mh-ava img { width: 100%; height: 100%; object-fit: cover; }
+    .mines-hist-item .mh-x { font-weight: 800; color: #ffd447; white-space: nowrap; }
+
     /* === Нижняя панель навигации (жидкое стекло) === */
     .bottom-nav {
       position: fixed;
@@ -885,7 +902,11 @@
         <button class="mines-new-btn" id="minesAgain" style="display:none;">🔄 Новая игра</button>
       </div>
       <div style="margin-top:12px;">
-        <button class="mines-new-btn" id="minesHistoryBtn" style="width:100%; background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04)); color:#fff; box-shadow:none; border:1px solid rgba(255,255,255,0.16);">📜 История матчей</button>
+        <div style="display:flex; gap:8px;">
+          <button class="mines-tab" id="minesTabHistory">📜 История</button>
+          <button class="mines-tab" id="minesTabLeader">🏆 Топ иксы</button>
+        </div>
+        <div id="minesWrapMsg" style="display:none; margin-top:10px;"></div>
         <div id="minesHistoryWrap" style="display:none; margin-top:10px;"></div>
       </div>
     </div>
@@ -1618,40 +1639,92 @@
       })[ch]);
     }
 
-    // История матчей
-    document.getElementById('minesHistoryBtn').addEventListener('click', async () => {
-      const wrap = document.getElementById('minesHistoryWrap');
-      if (wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
-      wrap.style.display = '';
-      wrap.innerHTML = '⏳ Загрузка...';
+    // Вкладки "История" / "Топ иксы"
+    const minesWrap = document.getElementById('minesHistoryWrap');
+    const minesWrapMsg = document.getElementById('minesWrapMsg');
+    const minesTabState = { history: false, leader: false };
+
+    async function minesLoadHistory() {
+      minesWrapMsg.style.display = 'none';
+      minesWrap.style.display = '';
+      minesWrap.innerHTML = '⏳ Загрузка...';
       try {
         const data = await minesFetch(MINES_API + '/history?userId=' + myUserId, {
           headers: { 'ngrok-skip-browser-warning': 'true' }
         }, 2);
         if (!data.ok || !data.items || !data.items.length) {
-          wrap.innerHTML = 'Пока нет сыгранных матчей. Сыграй — и результат появится здесь и в ЛС';
+          minesWrap.innerHTML = 'Пока нет сыгранных матчей. Сыграй — и результат появится здесь и в ЛС';
           return;
         }
         const rows = data.items.map((it) => {
           const d = new Date(it.date);
           const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
           const icon = it.result === 'loss' ? '💥' : '✅';
-          const x = 'x' + (Number(it.mult) || 1).toFixed(2);
-          const desc = it.result === 'loss'
-            ? '−' + it.bet + ' ⭐'
-            : '+' + it.payout + ' ⭐';
+          const desc = it.result === 'loss' ? '−' + it.bet + ' ⭐' : '+' + it.payout + ' ⭐';
           return '<div class="mines-hist-item">' +
             '<span class="mh-nick">' + icon + ' <b>' + minesEscapeHtml(it.username) + '</b></span>' +
-            '<span class="mh-x">' + x + '</span>' +
+            '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
             '<span class="mh-info">' + desc + '</span>' +
             '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
           '</div>';
         });
-        wrap.innerHTML = rows.join('');
+        minesWrap.innerHTML = rows.join('');
       } catch (e) {
-        wrap.innerHTML = 'Не удалось загрузить историю';
+        minesWrap.innerHTML = 'Не удалось загрузить историю';
       }
-    });
+    }
+
+    async function minesLoadLeaderboard() {
+      minesWrapMsg.style.display = 'none';
+      minesWrap.style.display = '';
+      minesWrap.innerHTML = '⏳ Загрузка...';
+      try {
+        const data = await minesFetch(MINES_API + '/leaderboard', {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        }, 2);
+        if (!data.ok || !data.items || !data.items.length) {
+          minesWrap.innerHTML = 'Пока нет ни одного выигрыша. Забирай жирный x — и попадёшь в топ!';
+          return;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        const rows = data.items.map((it, idx) => {
+          const d = new Date(it.date);
+          const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          const rank = idx < 3 ? medals[idx] : '<span class="mh-nick" style="color:var(--muted);font-weight:800">' + (idx + 1) + '</span>';
+          return '<div class="mines-hist-item">' +
+            '<span class="mh-rank">' + rank + '</span>' +
+            '<span class="mh-ava"><img src="' + avatarUrl(it.userId) + '" alt="" onerror="this.remove()"></span>' +
+            '<span class="mh-nick"><b>' + minesEscapeHtml(it.username) + '</b></span>' +
+            '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
+            '<span class="mh-info">+' + it.payout + ' ⭐</span>' +
+            '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
+          '</div>';
+        });
+        minesWrap.innerHTML = rows.join('');
+      } catch (e) {
+        minesWrap.innerHTML = 'Не удалось загрузить топ';
+      }
+    }
+
+    function minesActivateTab(tab) {
+      const isHistory = tab === 'history';
+      document.getElementById('minesTabHistory').classList.toggle('active', isHistory);
+      document.getElementById('minesTabLeader').classList.toggle('active', !isHistory);
+      const key = isHistory ? 'history' : 'leader';
+      const loaded = minesTabState[key];
+      minesTabState[key] = true;
+      if (!loaded) {
+        if (isHistory) minesLoadHistory();
+        else minesLoadLeaderboard();
+      } else {
+        minesWrap.style.display = (minesWrap.style.display === 'none') ? '' : '';
+        minesWrapMsg.style.display = 'none';
+        minesWrap.style.display = '';
+      }
+    }
+
+    document.getElementById('minesTabHistory').addEventListener('click', () => minesActivateTab('history'));
+    document.getElementById('minesTabLeader').addEventListener('click', () => minesActivateTab('leader'));
 
     // Кнопка "Играть" на баннере: ведёт к полю
     document.getElementById('minesHeroPlay').addEventListener('click', () => {
