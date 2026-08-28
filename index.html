@@ -1718,8 +1718,7 @@
     const minesState = { playing: false, bet: 100, mineCount: 3, minesSet: [], opened: 0, mult: 1, payout: 0 };
 
     const minesBalanceEl = document.getElementById('minesBalance');
-    const minesStatusEl2 = document.getElementById('minesStatus'); // dummy
-    // minesStatusEl already declared above
+    const minesStatusEl = document.getElementById('minesStatus');
     const minesGridEl = document.getElementById('minesGrid');
 
     function minesOpen() {
@@ -1729,7 +1728,7 @@
       document.getElementById('minesScreen').style.display = 'flex';
       document.getElementById('minesScreen').classList.add('idle');
       minesState.playing = false;
-      if(minesStatusEl) if(minesStatusEl) minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
+      if(minesStatusEl) minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
       renderMinesGrid();
       updateMinesUI();
       refreshMinesBalance();
@@ -1748,7 +1747,7 @@
         });
         const data = await res.json();
         if (data.ok) {
-          if(minesBalanceEl) if(minesBalanceEl) if(minesBalanceEl) minesBalanceEl.textContent = data.balance;
+          if(minesBalanceEl) minesBalanceEl.textContent = data.balance;
           document.getElementById('balanceValue').textContent = data.balance;
         }
       } catch (e) {}
