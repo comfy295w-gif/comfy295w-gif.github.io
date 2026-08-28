@@ -1500,12 +1500,11 @@
       minesState.playing = false;
       minesGridEl.classList.add('ended');
       try {
-        const res = await fetch(MINES_API + '/cashout', {
+        const data = await minesFetch(MINES_API + '/cashout', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+          headers: MINES_FETCH_OPTS.headers,
           body: JSON.stringify({ userId: myUserId, amount: win })
-        });
-        const data = await res.json();
+        }, 2);
         if (data.ok) {
           minesBalanceEl.textContent = data.balance;
           document.getElementById('balanceValue').textContent = data.balance;
@@ -1516,12 +1515,28 @@
           minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка выплаты');
         }
       } catch (e) {
-        minesStatusEl.innerHTML = '❌ Нет связи с сервером';
+        minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми "Забрать" ещё раз.';
       }
       document.getElementById('minesAgain').style.display = '';
     }
 
-    // Выбор количества мин
+    // Повтор запроса при мгновенном сбое сети (2 попытки)
+    async function minesFetch(url, opts, tries) {
+      const max = tries || 2;
+      for (let i = 0; i < max; i++) {
+        try {
+          const res = await fetch(url, opts);
+          return await res.json();
+        } catch (e) {
+          if (i === max - 1) throw e;
+          await new Promise((r) => setTimeout(r, 700));
+        }
+      }
+    }
+    const MINES_FETCH_OPTS = {
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }
+    };
+
     let selectedMineCount = 3;
     document.querySelectorAll('#mineCountChips .mines-chip').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -1565,17 +1580,16 @@
       }
       minesStatusEl.innerHTML = '⏳ Ставка принимается...';
       try {
-        const res = await fetch(MINES_API + '/bet', {
+        const data = await minesFetch(MINES_API + '/bet', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+          headers: MINES_FETCH_OPTS.headers,
           body: JSON.stringify({
             userId: myUserId,
             amount: bet,
             username: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '',
             firstName: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || '') : ''
           })
-        });
-        const data = await res.json();
+        }, 2);
         if (!data.ok) {
           minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' ⭐)' : '');
           minesBalanceEl.textContent = data.balance !== undefined ? data.balance : minesBalanceEl.textContent;
@@ -1598,7 +1612,7 @@
         renderMinesGrid();
         updateMinesUI();
       } catch (e) {
-        minesStatusEl.innerHTML = '❌ Нет связи с сервером';
+        minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми ещё раз.';
       }
     });
 
