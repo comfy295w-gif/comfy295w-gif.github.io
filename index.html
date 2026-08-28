@@ -2214,10 +2214,9 @@
     // Переключение секций нижней панели
     function switchNavSection(section) {
       if (section === 'home' || section === 'tasks' || section === 'games') {
-        // Показываем главный контент
-        closeArenaScreen();
-        minesClose();
         closeProfileScreen();
+        minesClose();
+        closeArenaScreen();
       } else if (section === 'profile') {
         openProfileScreen();
       }
@@ -2227,9 +2226,7 @@
     navArr.forEach((item) => {
       item.addEventListener('click', () => {
         const section = item.dataset.section;
-        if (section === 'profile') {
-          switchNavSection('profile');
-        }
+        switchNavSection(section);
       });
     });
   </script>
