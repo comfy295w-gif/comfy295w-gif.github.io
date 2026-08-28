@@ -1266,12 +1266,8 @@
           clearInterval(interval);
           setTimeout(function() {
             splash.classList.add('hide');
-            // После загрузки показываем модалку подписки (если ещё не подписывался)
-            if (!localStorage.getItem('subscribed')) {
-              setTimeout(function() {
-                document.getElementById('sub-overlay').classList.add('show');
-              }, 500);
-            }
+            // После загрузки проверяем подписку через бота
+            setTimeout(function() { checkSubscription(showSubModal); }, 500);
           }, 400);
         } else {
           bar.style.width = progress + '%';
@@ -1279,10 +1275,60 @@
       }, 200);
     })();
 
-    // Проверка подписки
-    document.getElementById('subCheck').addEventListener('click', () => {
-      localStorage.setItem('subscribed', '1');
+    // === Проверка подписки на канал через бота ===
+    const CHANNEL_LINK = 'https://t.me/mirrox15';
+    let subChecked = false;
+    let subModalShown = false;
+
+    async function checkSubscription(autoshow) {
+      if (subChecked) return;
+      try {
+        const res = await fetch(ARENA_BASE_URL + '/api/check-sub?userId=' + USER_ID, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
+        const data = await res.json();
+        subChecked = true;
+        if (data.ok && data.subscribed) {
+          hideSubModal();
+        } else if (autoshow) {
+          showSubModal();
+        }
+      } catch (e) {
+        // Сервер недоступен — показываем модалку, но разрешаем закрыть
+        if (autoshow) showSubModal();
+      }
+    }
+
+    function showSubModal() {
+      subModalShown = true;
+      document.getElementById('sub-overlay').classList.add('show');
+    }
+    function hideSubModal() {
+      subModalShown = false;
       document.getElementById('sub-overlay').classList.remove('show');
+    }
+
+    document.getElementById('subCheck').addEventListener('click', async () => {
+      const btn = document.getElementById('subCheck');
+      btn.textContent = 'Проверяю...';
+      btn.disabled = true;
+      subChecked = false;
+      try {
+        const res = await fetch(ARENA_BASE_URL + '/api/check-sub?userId=' + USER_ID, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
+        const data = await res.json();
+        if (data.ok && data.subscribed) {
+          hideSubModal();
+          btn.textContent = 'Я подписался, проверить';
+        } else {
+          subChecked = true;
+          btn.textContent = 'Ты ещё не подписан. Подпишись и нажми ещё раз';
+        }
+      } catch (e) {
+        btn.textContent = 'Ошибка. Попробуй ещё раз';
+      }
+      btn.disabled = false;
     });
 
     // Берём баланс из URL (?balance=...), который передал бот
