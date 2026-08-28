@@ -393,19 +393,38 @@
     .mines-label { font-size: 13px; font-weight: 600; color: var(--muted); flex-shrink: 0; }
     .mines-chips { display: flex; gap: 8px; }
     .mines-chip {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-      background-color: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+      background-color: rgba(0,0,0,0.35);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      backdrop-filter: blur(16px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.16);
       color: var(--text);
-      padding: 8px 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
-      transition: transform 0.1s;
+      padding: 9px 16px; border-radius: 14px; font-size: 14px; font-weight: 700; cursor: pointer;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.14), 0 4px 12px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
+      transform: perspective(300px) translateZ(0);
+      transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s, background 0.2s;
     }
+    .mines-chip:hover { transform: perspective(300px) translateZ(4px) scale(1.03); box-shadow: inset 0 1px 1px rgba(255,255,255,0.18), 0 6px 16px rgba(0,0,0,0.45); }
     .mines-chip.selected {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border-color: transparent; color: #fff;
-      box-shadow: 0 4px 14px rgba(124,92,255,0.4);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.28), 0 6px 18px rgba(124,92,255,0.5), 0 0 14px rgba(124,92,255,0.35);
+      transform: perspective(300px) translateZ(8px);
     }
-    .mines-chip:active { transform: scale(0.94); }
+    .mines-chip:active { transform: perspective(300px) translateZ(2px) scale(0.96); }
+    .mines-x-label {
+      text-align: center; font-size: 28px; font-weight: 800; color: var(--gold);
+      background: linear-gradient(180deg, rgba(255,215,0,0.20), rgba(255,140,0,0.10));
+      background-color: rgba(0,0,0,0.4);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255,215,0,0.28);
+      border-radius: 16px; padding: 12px 16px; margin-bottom: 14px;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.18), 0 8px 22px rgba(0,0,0,0.45), 0 0 18px rgba(255,215,0,0.18);
+      transform: perspective(400px) translateZ(0);
+      transition: transform 0.3s, opacity 0.3s;
+      letter-spacing: 0.5px;
+    }
     .mines-custom {
       width: 100%; box-sizing: border-box; margin-top: 12px;
       padding: 12px 16px; border-radius: 12px;
@@ -1001,10 +1020,21 @@
       <div></div>
     </div>
     <div class="mines-body">
+      <div id="minesXLabel" class="mines-x-label" style="display:none;">1.00x</div>
       <div class="mines-grid" id="minesGrid"></div>
-      <div class="mines-size-row" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-start;">
-        <button class="mines-chip selected" data-size="5">5×5</button>
-        <button class="mines-chip" data-size="4">4×4</button>
+      <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+        <div class="mines-size-row" style="display:flex; gap:8px; justify-content:flex-start; align-items:center;">
+          <span style="font-size:13px;color:var(--muted);font-weight:600;">Поле:</span>
+          <button class="mines-chip selected" data-size="5">5×5</button>
+          <button class="mines-chip" data-size="4">4×4</button>
+        </div>
+        <div class="mines-mines-row" style="display:flex; gap:8px; justify-content:flex-start; align-items:center;">
+          <span style="font-size:13px;color:var(--muted);font-weight:600;">Мины:</span>
+          <button class="mines-chip" data-mines="2">2</button>
+          <button class="mines-chip" data-mines="4">4</button>
+          <button class="mines-chip selected" data-mines="8">8</button>
+          <button class="mines-chip" data-mines="10">10</button>
+        </div>
       </div>
       <div style="margin-top:16px;">
         <div style="display:flex; gap:8px;">
@@ -1794,6 +1824,15 @@
       const _mm = document.getElementById('minesMult'); if(_mm) _mm.textContent = minesState.mult.toFixed(2);
       const payoutEl = document.getElementById('minesPayout'); if(payoutEl) payoutEl.textContent = minesState.playing ? Math.floor(minesState.bet * minesState.mult) : 0;
       { const _cc = document.getElementById('minesCashout'); if(_cc) _cc.disabled = minesState.opened === 0 || !minesState.playing; }
+      const xLab = document.getElementById('minesXLabel');
+      if(xLab){
+        if(minesState.playing){
+          xLab.style.display = '';
+          xLab.textContent = minesState.mult.toFixed(2) + 'x';
+        } else {
+          xLab.style.display = 'none';
+        }
+      }
     }
 
     function minesGetNick() {
@@ -1916,11 +1955,19 @@
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }
     };
 
-    let selectedMineCount = 3;
+    let selectedMineCount = 8;
     let selectedMinesBet = 100;
     // Размер поля: 4x4 / 5x5 (кнопки такие же как mines-chip)
     document.querySelectorAll('.mines-size-row .mines-chip').forEach((btn)=>{
       btn.addEventListener('click',()=> setMinesFieldSize(Number(btn.dataset.size)));
+    });
+    // Выбор количества мин: 2,4,8,10
+    document.querySelectorAll('.mines-mines-row .mines-chip').forEach((btn)=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.mines-mines-row .mines-chip').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMineCount = Number(btn.dataset.mines);
+      });
     });
 
     function minesEscapeHtml(s) {
