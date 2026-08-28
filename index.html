@@ -1158,13 +1158,48 @@
       });
     });
 
-    // Оплата через Telegram Stars
-    topupPayBtn.addEventListener('click', () => {
+    // Оплата через Telegram Stars — прямо в мини-аппе
+    const SERVER_URL = 'https://linguist-cloud-manned.ngrok-free.dev';
+    topupPayBtn.addEventListener('click', async () => {
       const amount = parseInt(topupAmount.value, 10);
       if (!amount || amount < 1) return;
-      // Отправляем инвойс через бота
-      tg.openTelegramLink('https://t.me/' + BOT_USERNAME + '?start=topup_' + amount);
-      topupOverlay.classList.remove('show');
+      topupPayBtn.disabled = true;
+      topupPayBtn.textContent = 'Создаю invoice...';
+      try {
+        // 1. Запрашиваем инвойс у бота
+        const resp = await fetch(SERVER_URL + '/api/create-invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+          body: JSON.stringify({ userId: USER_ID, amount })
+        });
+        const data = await resp.json();
+        if (!data.ok || !data.link) {
+          alert('Ошибка: ' + (data.error || 'Не удалось создать инвойс'));
+          topupPayBtn.disabled = false;
+          topupPayBtn.textContent = 'Оплатить';
+          return;
+        }
+        // 2. Открываем оплату прямо в мини-аппе
+        tg.openInvoice(data.link, (status) => {
+          if (status === 'paid') {
+            topupOverlay.classList.remove('show');
+            // Обновляем баланс
+            fetch(SERVER_URL + '/api/mines/balance?userId=' + USER_ID, {
+              headers: { 'ngrok-skip-browser-warning': 'true' }
+            }).then(r => r.json()).then(d => {
+              if (d.ok) document.getElementById('balanceValue').textContent = d.balance;
+            }).catch(() => {});
+          } else if (status === 'cancelled') {
+            // отмена — ничего
+          }
+          topupPayBtn.disabled = false;
+          topupPayBtn.textContent = 'Оплатить';
+        });
+      } catch (e) {
+        alert('Ошибка сети: ' + e.message);
+        topupPayBtn.disabled = false;
+        topupPayBtn.textContent = 'Оплатить';
+      }
     });
 
     // Закрыть модалку
