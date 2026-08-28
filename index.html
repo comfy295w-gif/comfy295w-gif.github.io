@@ -1642,7 +1642,7 @@
     // Вкладки "История" / "Топ иксы"
     const minesWrap = document.getElementById('minesHistoryWrap');
     const minesWrapMsg = document.getElementById('minesWrapMsg');
-    const minesTabState = { history: false, leader: false };
+    const minesTabHtml = { history: '', leader: '' };
 
     async function minesLoadHistory() {
       minesWrapMsg.style.display = 'none';
@@ -1653,22 +1653,22 @@
           headers: { 'ngrok-skip-browser-warning': 'true' }
         }, 2);
         if (!data.ok || !data.items || !data.items.length) {
-          minesWrap.innerHTML = 'Пока нет сыгранных матчей. Сыграй — и результат появится здесь и в ЛС';
-          return;
+          minesTabHtml.history = 'Пока нет сыгранных матчей. Сыграй — и результат появится здесь и в ЛС';
+        } else {
+          minesTabHtml.history = data.items.map((it) => {
+            const d = new Date(it.date);
+            const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            const icon = it.result === 'loss' ? '💥' : '✅';
+            const desc = it.result === 'loss' ? '−' + it.bet + ' ⭐' : '+' + it.payout + ' ⭐';
+            return '<div class="mines-hist-item">' +
+              '<span class="mh-nick">' + icon + ' <b>' + minesEscapeHtml(it.username) + '</b></span>' +
+              '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
+              '<span class="mh-info">' + desc + '</span>' +
+              '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
+            '</div>';
+          }).join('');
         }
-        const rows = data.items.map((it) => {
-          const d = new Date(it.date);
-          const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-          const icon = it.result === 'loss' ? '💥' : '✅';
-          const desc = it.result === 'loss' ? '−' + it.bet + ' ⭐' : '+' + it.payout + ' ⭐';
-          return '<div class="mines-hist-item">' +
-            '<span class="mh-nick">' + icon + ' <b>' + minesEscapeHtml(it.username) + '</b></span>' +
-            '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
-            '<span class="mh-info">' + desc + '</span>' +
-            '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
-          '</div>';
-        });
-        minesWrap.innerHTML = rows.join('');
+        minesWrap.innerHTML = minesTabHtml.history;
       } catch (e) {
         minesWrap.innerHTML = 'Не удалось загрузить историю';
       }
@@ -1683,24 +1683,24 @@
           headers: { 'ngrok-skip-browser-warning': 'true' }
         }, 2);
         if (!data.ok || !data.items || !data.items.length) {
-          minesWrap.innerHTML = 'Пока нет ни одного выигрыша. Забирай жирный x — и попадёшь в топ!';
-          return;
+          minesTabHtml.leader = 'Пока нет ни одного выигрыша. Забирай жирный x — и попадёшь в топ!';
+        } else {
+          const medals = ['🥇', '🥈', '🥉'];
+          minesTabHtml.leader = data.items.map((it, idx) => {
+            const d = new Date(it.date);
+            const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            const rank = idx < 3 ? medals[idx] : '<span style="color:var(--muted);font-weight:800">' + (idx + 1) + '</span>';
+            return '<div class="mines-hist-item">' +
+              '<span class="mh-rank">' + rank + '</span>' +
+              '<span class="mh-ava"><img src="' + avatarUrl(it.userId) + '" alt="" onerror="this.remove()"></span>' +
+              '<span class="mh-nick"><b>' + minesEscapeHtml(it.username) + '</b></span>' +
+              '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
+              '<span class="mh-info">+' + it.payout + ' ⭐</span>' +
+              '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
+            '</div>';
+          }).join('');
         }
-        const medals = ['🥇', '🥈', '🥉'];
-        const rows = data.items.map((it, idx) => {
-          const d = new Date(it.date);
-          const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-          const rank = idx < 3 ? medals[idx] : '<span class="mh-nick" style="color:var(--muted);font-weight:800">' + (idx + 1) + '</span>';
-          return '<div class="mines-hist-item">' +
-            '<span class="mh-rank">' + rank + '</span>' +
-            '<span class="mh-ava"><img src="' + avatarUrl(it.userId) + '" alt="" onerror="this.remove()"></span>' +
-            '<span class="mh-nick"><b>' + minesEscapeHtml(it.username) + '</b></span>' +
-            '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
-            '<span class="mh-info">+' + it.payout + ' ⭐</span>' +
-            '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
-          '</div>';
-        });
-        minesWrap.innerHTML = rows.join('');
+        minesWrap.innerHTML = minesTabHtml.leader;
       } catch (e) {
         minesWrap.innerHTML = 'Не удалось загрузить топ';
       }
@@ -1711,15 +1711,14 @@
       document.getElementById('minesTabHistory').classList.toggle('active', isHistory);
       document.getElementById('minesTabLeader').classList.toggle('active', !isHistory);
       const key = isHistory ? 'history' : 'leader';
-      const loaded = minesTabState[key];
-      minesTabState[key] = true;
-      if (!loaded) {
+      minesWrapMsg.style.display = 'none';
+      if (minesTabHtml[key]) {
+        minesWrap.style.display = '';
+        minesWrap.innerHTML = minesTabHtml[key];
+      } else {
+        minesWrap.style.display = '';
         if (isHistory) minesLoadHistory();
         else minesLoadLeaderboard();
-      } else {
-        minesWrap.style.display = (minesWrap.style.display === 'none') ? '' : '';
-        minesWrapMsg.style.display = 'none';
-        minesWrap.style.display = '';
       }
     }
 
@@ -1748,6 +1747,7 @@
           body: JSON.stringify({
             userId: myUserId,
             amount: bet,
+            mines: selectedMineCount,
             username: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || '') : '',
             firstName: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || '') : ''
           })
