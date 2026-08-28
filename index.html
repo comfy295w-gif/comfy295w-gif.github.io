@@ -1073,6 +1073,44 @@
     const ARENA_API = 'https://linguist-cloud-manned.ngrok-free.dev/api/arena';
     const ARENA_BASE = ARENA_API.replace(/\/arena$/, '');
     function avatarUrl(userId) { return ARENA_BASE + '/api/avatar/' + userId; }
+
+    // ngrok отдаёт предупреждение вместо картинки, если в запросе нет заголовка
+    // ngrok-skip-browser-warning. Обычный <img> его не шлёт, поэтому грузим аватар
+    // через fetch с заголовком и вставляем как data-URL.
+    const avatarCache = {};
+    function avatarDataURL(userId) {
+      return new Promise((resolve) => {
+        if (avatarCache[userId] !== undefined) { resolve(avatarCache[userId]); return; }
+        fetch(avatarUrl(userId), { headers: { 'ngrok-skip-browser-warning': 'true' } })
+          .then(async (r) => {
+            if (!r.ok) throw new Error('avatar not found');
+            const ct = r.headers.get('Content-Type') || 'image/png';
+            avatarCache[userId] = 'data:' + ct + ';base64,' + avatarBytesToB64(await r.arrayBuffer());
+            resolve(avatarCache[userId]);
+          })
+          .catch(() => { avatarCache[userId] = ''; resolve(''); });
+      });
+    }
+    function avatarBytesToB64(buf) {
+      const bytes = new Uint8Array(buf);
+      let bin = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(bin);
+    }
+    function fillAvatarImages(root, attr) {
+      if (!root) return;
+      root.querySelectorAll('[data-uid]').forEach((el) => {
+        const uid = el.getAttribute('data-uid');
+        avatarDataURL(uid).then((u) => {
+          if (!el.isConnected) return;
+          if (u) el.setAttribute(attr, u);
+          else el.remove();
+        });
+      });
+    }
     const USER_ID = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
 
     let selectedBet = 100;
@@ -1121,12 +1159,13 @@
             const initial = (nm.trim().charAt(0) || '?').toUpperCase();
             return '<div class="arena-player">' +
               '<div class="arena-player-avatar"><span class="a-initial">' + initial + '</span>' +
-                '<img src="' + avatarUrl(e.userId) + '" alt="" loading="lazy" onerror="this.remove()">' +
+                '<img data-uid="' + e.userId + '" src="" alt="" onerror="this.remove()">' +
               '</div>' +
               '<span class="arena-player-name">' + nm + '</span>' +
               '<span class="arena-player-bet">' + e.bet + ' ⭐</span>' +
             '</div>';
           }).join('');
+          fillAvatarImages(listEl, 'src');
         } else {
           listEl.innerHTML = 'Пока никто не поставил';
         }
@@ -1194,7 +1233,7 @@
             '<clipPath id="wclip' + i + '"><circle cx="' + av.x.toFixed(2) + '" cy="' + av.y.toFixed(2) + '" r="' + AVATAR_R + '"/></clipPath>' +
             '<circle class="w-ring" cx="' + av.x.toFixed(2) + '" cy="' + av.y.toFixed(2) + '" r="' + AVATAR_R + '" fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>' +
             '<text class="w-initial" x="' + av.x.toFixed(2) + '" y="' + (av.y + 7).toFixed(2) + '" text-anchor="middle" font-size="19" font-weight="700" fill="#fff" font-family="inherit">' + initial + '</text>' +
-            '<image href="' + avatarUrl(p.userId) + '" x="' + (av.x - AVATAR_R) + '" y="' + (av.y - AVATAR_R) + '" width="' + (2 * AVATAR_R) + '" height="' + (2 * AVATAR_R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#wclip' + i + ')" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'"></image>' +
+            '<image data-uid="' + p.userId + '" href="" x="' + (av.x - AVATAR_R) + '" y="' + (av.y - AVATAR_R) + '" width="' + (2 * AVATAR_R) + '" height="' + (2 * AVATAR_R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#wclip' + i + ')" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'"></image>' +
           '</g>';
         s0 = s1;
       });
@@ -1222,6 +1261,7 @@
         sliceCount = players.length;
         landingLock = null;
         wheel.innerHTML = buildWheelHtml(players);
+        fillAvatarImages(wheel, 'href');
         wheel.classList.remove('glow');
         stopSpin();
         wheelAngle = 0;
@@ -1692,7 +1732,7 @@
             const rank = idx < 3 ? medals[idx] : '<span style="color:var(--muted);font-weight:800">' + (idx + 1) + '</span>';
             return '<div class="mines-hist-item">' +
               '<span class="mh-rank">' + rank + '</span>' +
-              '<span class="mh-ava"><img src="' + avatarUrl(it.userId) + '" alt="" onerror="this.remove()"></span>' +
+              '<span class="mh-ava"><img data-uid="' + it.userId + '" src="" alt="" onerror="this.remove()"></span>' +
               '<span class="mh-nick"><b>' + minesEscapeHtml(it.username) + '</b></span>' +
               '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
               '<span class="mh-info">+' + it.payout + ' ⭐</span>' +
@@ -1701,6 +1741,7 @@
           }).join('');
         }
         minesWrap.innerHTML = minesTabHtml.leader;
+        fillAvatarImages(minesWrap, 'src');
       } catch (e) {
         minesWrap.innerHTML = 'Не удалось загрузить топ';
       }
@@ -1715,6 +1756,7 @@
       if (minesTabHtml[key]) {
         minesWrap.style.display = '';
         minesWrap.innerHTML = minesTabHtml[key];
+        if (!isHistory) fillAvatarImages(minesWrap, 'src');
       } else {
         minesWrap.style.display = '';
         if (isHistory) minesLoadHistory();
