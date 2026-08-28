@@ -488,19 +488,49 @@
     }
     .mines-cell:active { transform: scale(0.94); }
     .mines-cell.safe {
-      background: linear-gradient(135deg, #38ef7d, #11998e);
-      border-color: transparent; cursor: default;
-      box-shadow: 0 4px 14px rgba(56,239,125,0.35);
+      background: linear-gradient(135deg, rgba(56,239,125,0.95), rgba(17,153,142,0.9));
+      background-color: rgba(56,239,125,0.18);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(56,239,125,0.45);
+      cursor: default;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.28), 0 6px 18px rgba(56,239,125,0.45), 0 0 16px rgba(56,239,125,0.35), inset 0 0 12px rgba(255,255,255,0.12);
+      transform: perspective(300px) translateZ(6px);
     }
     .mines-cell.mine {
-      background: linear-gradient(135deg, #ff5f57, #ff2d2d);
-      border-color: transparent; cursor: default;
-      box-shadow: 0 4px 14px rgba(255,77,77,0.45);
+      background: linear-gradient(135deg, rgba(255,95,87,0.95), rgba(255,45,45,0.92));
+      background-color: rgba(255,45,45,0.18);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(255,77,77,0.5);
+      cursor: default;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.22), 0 6px 18px rgba(255,77,77,0.5), 0 0 16px rgba(255,77,77,0.4), inset 0 0 12px rgba(255,255,255,0.08);
+      transform: perspective(300px) translateZ(6px);
     }
     .mines-cell.hidden-mine {
       background: linear-gradient(135deg, rgba(255,120,120,0.30), rgba(255,45,45,0.20));
       border-color: transparent; cursor: default;
     }
+    .mines-play-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; border-radius: 16px; padding: 14px 28px; font-size: 16px; font-weight: 800; cursor: pointer;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.28), 0 8px 22px rgba(124,92,255,0.45), 0 0 16px rgba(124,92,255,0.3);
+      transform: perspective(300px) translateZ(0);
+      transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s;
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      backdrop-filter: blur(12px) saturate(140%);
+    }
+    .mines-play-btn:hover { transform: perspective(300px) translateZ(6px) scale(1.02); box-shadow: inset 0 1px 1px rgba(255,255,255,0.32), 0 10px 26px rgba(124,92,255,0.5); }
+    .mines-play-btn:active { transform: perspective(300px) translateZ(2px) scale(0.97); }
+    .mines-cash-btn {
+      background: linear-gradient(135deg, #38ef7d, #11998e);
+      color: #fff; border: none; border-radius: 16px; padding: 14px 22px; font-size: 15px; font-weight: 800; cursor: pointer;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.28), 0 6px 18px rgba(56,239,125,0.45), 0 0 14px rgba(56,239,125,0.3);
+      transform: perspective(300px) translateZ(0);
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .mines-cash-btn:hover { transform: perspective(300px) translateZ(4px) scale(1.02); }
+    .mines-cash-btn:disabled { opacity: 0.45; pointer-events: none; }
     .mines-status { text-align: center; font-size: 14px; color: var(--muted); margin-top: 14px; min-height: 20px; }
     .mines-new-btn {
       display: block; margin: 0 auto; border: none; border-radius: 14px; padding: 12px 24px;
@@ -1036,6 +1066,11 @@
           <button class="mines-chip" data-mines="10">10</button>
         </div>
       </div>
+      <div style="margin-top:16px; display:flex; gap:10px; justify-content:center; align-items:center;">
+        <button class="mines-play-btn" id="minesStart">🎮 Играть — 100 <img src="star.png" class="star-icon" alt="⭐"></button>
+        <button class="mines-cash-btn" id="minesCashout" style="display:none;">💎 Забрать — <span id="minesCashPayout">0</span> <img src="star.png" class="star-icon" alt="⭐"></button>
+      </div>
+      <div id="minesStatus" style="text-align:center; font-size:13px; color:var(--muted); margin-top:10px; min-height:16px;"></div>
       <div style="margin-top:16px;">
         <div style="display:flex; gap:8px;">
           <button class="mines-tab" id="minesTabHistory">📜 История</button>
@@ -1831,6 +1866,20 @@
           xLab.textContent = minesState.mult.toFixed(2) + 'x';
         } else {
           xLab.style.display = 'none';
+        }
+      }
+      const playBtn = document.getElementById('minesStart');
+      const cashBtn = document.getElementById('minesCashout');
+      const cashPayout = document.getElementById('minesCashPayout');
+      if(playBtn && cashBtn){
+        if(minesState.playing){
+          playBtn.style.display = 'none';
+          cashBtn.style.display = '';
+          if(cashPayout) cashPayout.textContent = Math.floor(minesState.bet * minesState.mult);
+          cashBtn.disabled = minesState.opened === 0;
+        } else {
+          playBtn.style.display = '';
+          cashBtn.style.display = 'none';
         }
       }
     }
