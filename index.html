@@ -1290,12 +1290,13 @@
         subChecked = true;
         if (data.ok && data.subscribed) {
           hideSubModal();
-        } else if (autoshow) {
+        } else if (data.ok && !data.subscribed && autoshow) {
           showSubModal();
         }
+        // Если проверка вернула ошибку (например, бот не админ канала) — окно не показываем,
+        // чтобы не ошибочно просить уже подписанных пользователей.
       } catch (e) {
-        // Сервер недоступен — показываем модалку, но разрешаем закрыть
-        if (autoshow) showSubModal();
+        // Сервер недоступен — не блокируем пользователя
       }
     }
 
