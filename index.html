@@ -208,6 +208,27 @@
       border-radius: 16px;
     }
 
+    /* Карточка Арена — широкий баннер */
+    .game-card-arena {
+      position: relative;
+      overflow: hidden;
+      flex: none;
+      height: 200px;
+      padding: 0 !important;
+      margin: 0 -16px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .game-card-arena img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
     .icon-arena     { background: linear-gradient(135deg,#a18cd1,#fbc2eb); }
     .icon-contest   { background: linear-gradient(135deg,#f7971e,#ffd200); }
@@ -635,38 +656,10 @@
         <img src="mines_card.png" alt="Мины">
       </div>
 
-      <div class="game-card" data-open="arena">
-        <div class="game-icon icon-arena">
-          <svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="10" x2="34" y2="32"/>
-            <line x1="26" y1="24" x2="30" y2="20"/>
-            <line x1="36" y1="10" x2="14" y2="32"/>
-            <line x1="22" y1="24" x2="18" y2="20"/>
-          </svg>
-        </div>
-        <div class="game-info">
-          <div class="game-name">Арена (PvP)</div>
-          <div class="game-desc">Ставь звёзды и забери весь банк</div>
-        </div>
-        <div class="game-arrow">›</div>
+      <div class="game-card game-card-arena" data-open="arena">
+        <img src="arena_card.png" alt="Арена">
       </div>
 
-      <div class="game-card">
-        <div class="game-icon icon-contest">
-          <svg viewBox="0 0 48 48" fill="none" stroke="#ffd700" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M13 8 H35 V14 A11 11 0 0 1 13 14 Z"/>
-            <path d="M13 11 H7 V14 A6 6 0 0 0 13 20"/>
-            <path d="M35 11 H41 V14 A6 6 0 0 1 35 20"/>
-            <path d="M24 25 V32"/>
-            <path d="M15 32 H33 V35 H15 Z"/>
-          </svg>
-        </div>
-        <div class="game-info">
-          <div class="game-name">Конкурсы</div>
-          <div class="game-desc">Выигрывай NFT и звёзды</div>
-        </div>
-        <div class="game-arrow">›</div>
-      </div>
       <div class="spacer"></div>
     </div>
 
