@@ -30,6 +30,7 @@
       overflow-x: hidden;
     }
 
+    .star-icon, .star-inline { width: 1em; height: 1em; vertical-align: -0.14em; display: inline-block; object-fit: contain; }
     /* === Верхняя панель с балансом === */
     .top-bar {
       padding: 14px 16px 10px;
@@ -938,15 +939,15 @@
       <div class="topup-sub">Оплата через Telegram Stars</div>
       <div class="topup-input-wrap">
         <input type="number" id="topupAmount" min="1" max="100000" placeholder="Сумма">
-        <span class="topup-stars-icon">⭐</span>
+        <span class="topup-stars-icon"><img src="star.svg" class="star-icon" alt="⭐"></span>
       </div>
       <div class="topup-presets">
-        <button class="topup-preset" data-amount="100">100 ⭐</button>
-        <button class="topup-preset" data-amount="250">250 ⭐</button>
-        <button class="topup-preset" data-amount="500">500 ⭐</button>
-        <button class="topup-preset" data-amount="1000">1000 ⭐</button>
-        <button class="topup-preset" data-amount="2500">2500 ⭐</button>
-        <button class="topup-preset" data-amount="5000">5000 ⭐</button>
+        <button class="topup-preset" data-amount="100">100 <img src="star.svg" class="star-icon" alt="⭐"></button>
+        <button class="topup-preset" data-amount="250">250 <img src="star.svg" class="star-icon" alt="⭐"></button>
+        <button class="topup-preset" data-amount="500">500 <img src="star.svg" class="star-icon" alt="⭐"></button>
+        <button class="topup-preset" data-amount="1000">1000 <img src="star.svg" class="star-icon" alt="⭐"></button>
+        <button class="topup-preset" data-amount="2500">2500 <img src="star.svg" class="star-icon" alt="⭐"></button>
+        <button class="topup-preset" data-amount="5000">5000 <img src="star.svg" class="star-icon" alt="⭐"></button>
       </div>
       <button class="topup-pay-btn" id="topupPayBtn" disabled>Оплатить</button>
       <button class="topup-close" id="topupClose">Отмена</button>
@@ -955,7 +956,7 @@
 
   <!-- Верх: баланс + аватар -->
   <div class="top-bar">
-    <button class="balance" id="topupBtn"><span class="stars-icon">⭐</span> <span id="balanceValue">0</span> <span class="plus">+</span></button>
+    <button class="balance" id="topupBtn"><span class="stars-icon"><img src="star.svg" class="star-icon" alt="⭐"></span> <span id="balanceValue">0</span> <span class="plus">+</span></button>
     <div class="profile-mini">😎</div>
   </div>
 
@@ -1005,7 +1006,7 @@
         <img src="mines_card.png" alt="Мины">
       </div>
 
-      <div class="mines-balance">⭐ Баланс: <span id="minesBalance">0</span></div>
+      <div class="mines-balance"><img src="star.svg" class="star-icon" alt="⭐"> Баланс: <span id="minesBalance">0</span></div>
 
       <div class="mines-panel" id="minesSetupPanel">
         <div class="mines-row">
@@ -1018,7 +1019,7 @@
           </div>
         </div>
         <div class="mines-row">
-          <span class="mines-label">Ставка ⭐</span>
+          <span class="mines-label">Ставка <img src="star.svg" class="star-icon" alt="⭐"></span>
           <div class="mines-chips" id="minesBetChips">
             <button class="mines-chip selected" data-bet="100">100</button>
             <button class="mines-chip" data-bet="250">250</button>
@@ -1035,7 +1036,7 @@
       <div class="mines-info">
         <div>
           <div class="mines-mult"><small>Множитель</small><span id="minesMult">1.00</span>x</div>
-          <div class="mines-expected">Заберёшь: <span id="minesPayout">0</span> ⭐</div>
+          <div class="mines-expected">Заберёшь: <span id="minesPayout">0</span> <img src="star.svg" class="star-icon" alt="⭐"></div>
         </div>
         <button class="mines-cash-btn" id="minesCashout" disabled>💎 Забрать</button>
       </div>
@@ -1065,7 +1066,7 @@
     <div class="arena-body">
       <div class="arena-bank-card">
         <div class="arena-bank-label">Общий банк</div>
-        <div class="arena-bank-amount"><span id="arenaBank">0</span> ⭐</div>
+        <div class="arena-bank-amount"><span id="arenaBank">0</span> <img src="star.svg" class="star-icon" alt="⭐"></div>
         <div class="arena-bank-sub">Участников: <span id="arenaPlayers">0</span></div>
       </div>
 
@@ -1121,7 +1122,7 @@
       <div class="profile-balance-card">
         <div class="profile-balance-label">Баланс</div>
         <div class="profile-balance-amount" id="profileBalance">0</div>
-        <div class="profile-balance-stars">Telegram Stars ⭐</div>
+        <div class="profile-balance-stars">Telegram Stars <img src="star.svg" class="star-icon" alt="⭐"></div>
       </div>
 
       <div class="profile-stat-row">
@@ -1141,7 +1142,7 @@
       </div>
 
       <div class="profile-actions">
-        <button class="profile-action-btn primary" id="profileTopup">⭐ Пополнить баланс</button>
+        <button class="profile-action-btn primary" id="profileTopup"><img src="star.svg" class="star-icon" alt="⭐"> Пополнить баланс</button>
         <button class="profile-action-btn" id="profileReferral">👥 Пригласить друга</button>
       </div>
     </div>
@@ -1464,7 +1465,7 @@
                 '<img data-uid="' + e.userId + '" src="" alt="" onerror="this.remove()">' +
               '</div>' +
               '<span class="arena-player-name">' + nm + '</span>' +
-              '<span class="arena-player-bet">' + e.bet + ' ⭐</span>' +
+              '<span class="arena-player-bet">' + e.bet + ' <img src="star.svg" class="star-icon" alt="⭐"></span>' +
             '</div>';
           }).join('');
           fillAvatarImages(listEl, 'src');
@@ -1672,7 +1673,7 @@
         const wName = data.winner.username || data.winner.name || 'Игрок';
         label.textContent = '🎯 Остановился на: ' + wName;
         result.style.display = '';
-        result.innerHTML = '🏆 Победитель: <b>' + wName + '</b> забирает весь банк ' + data.lastBank + ' ⭐!';
+        result.innerHTML = '🏆 Победитель: <b>' + wName + '</b> забирает весь банк ' + data.lastBank + ' <img src="star.svg" class="star-icon" alt="⭐">!';
       } else if (data.status === 'idle') {
         clearWinnerHighlight();
         resetWheel();
@@ -1723,7 +1724,7 @@
       const statusEl = document.getElementById('arenaStatus');
       const amount = getSelectedBet();
       if (!amount || amount < MIN_BET || amount > MAX_BET) {
-        statusEl.innerHTML = '⚠️ Введи сумму от ' + MIN_BET + ' до ' + MAX_BET + ' ⭐';
+        statusEl.innerHTML = '⚠️ Введи сумму от ' + MIN_BET + ' до ' + MAX_BET + ' <img src="star.svg" class="star-icon" alt="⭐">';
         return;
       }
       try {
@@ -1739,7 +1740,7 @@
         });
         const data = await res.json();
         if (data.ok) {
-          statusEl.innerHTML = '✅ Ты в игре на ' + amount + ' ⭐!<br>Баланс: ' + data.balance + ' ⭐';
+          statusEl.innerHTML = '✅ Ты в игре на ' + amount + ' <img src="star.svg" class="star-icon" alt="⭐">!<br>Баланс: ' + data.balance + ' <img src="star.svg" class="star-icon" alt="⭐">';
           document.getElementById('balanceValue').textContent = data.balance;
           refreshArena();
         } else {
@@ -1881,14 +1882,14 @@
         minesState.payout = 0;
         minesSetGameOver();
         minesReportResult('loss');
-        minesStatusEl.innerHTML = '💥 Бум! Ты нарвался на мину. Ставка <b>' + minesState.bet + ' ⭐</b> сгорела.';
+        minesStatusEl.innerHTML = '💥 Бум! Ты нарвался на мину. Ставка <b>' + minesState.bet + ' <img src="star.svg" class="star-icon" alt="⭐"></b> сгорела.';
         refreshMinesBalance();
         return;
       }
 
       // Безопасная ячейка: зелёная иконка + звезда
       cell.classList.add('safe');
-      cell.textContent = '⭐';
+      cell.innerHTML = '<img src="star.svg" class="star-icon" alt="<img src="star.svg" class="star-icon" alt="⭐">">';
       minesState.opened++;
       minesState.mult = minesMultFor(minesState.opened, minesState.mineCount);
       updateMinesUI();
@@ -1920,8 +1921,8 @@
           document.getElementById('balanceValue').textContent = data.balance;
           minesReportResult(auto ? 'win' : 'cashout');
           minesStatusEl.innerHTML = auto
-            ? '🎉 Открыты все безопасные клетки! Выигрыш <b>' + win + ' ⭐</b> зачислен.'
-            : '💎 Забрал <b>' + win + ' ⭐</b> (x' + minesState.mult.toFixed(2) + '). Ставка ' + minesState.bet + ' ⭐ + выигрыш зачислены.';
+            ? '🎉 Открыты все безопасные клетки! Выигрыш <b>' + win + ' <img src="star.svg" class="star-icon" alt="⭐"></b> зачислен.'
+            : '💎 Забрал <b>' + win + ' <img src="star.svg" class="star-icon" alt="⭐"></b> (x' + minesState.mult.toFixed(2) + '). Ставка ' + minesState.bet + ' <img src="star.svg" class="star-icon" alt="⭐"> + выигрыш зачислены.';
         } else {
           minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка выплаты');
         }
@@ -2001,7 +2002,7 @@
             const d = new Date(it.date);
             const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             const icon = it.result === 'loss' ? '💥' : '✅';
-            const desc = it.result === 'loss' ? '−' + it.bet + ' ⭐' : '+' + it.payout + ' ⭐';
+            const desc = it.result === 'loss' ? '−' + it.bet + ' <img src="star.svg" class="star-icon" alt="⭐">' : '+' + it.payout + ' <img src="star.svg" class="star-icon" alt="⭐">';
             return '<div class="mines-hist-item">' +
               '<span class="mh-nick">' + icon + ' <b>' + minesEscapeHtml(it.username) + '</b></span>' +
               '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
@@ -2037,7 +2038,7 @@
               '<span class="mh-ava"><img data-uid="' + it.userId + '" src="" alt="" onerror="this.remove()"></span>' +
               '<span class="mh-nick"><b>' + minesEscapeHtml(it.username) + '</b></span>' +
               '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
-              '<span class="mh-info">+' + it.payout + ' ⭐</span>' +
+              '<span class="mh-info">+' + it.payout + ' <img src="star.svg" class="star-icon" alt="⭐"></span>' +
               '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
             '</div>';
           }).join('');
@@ -2080,7 +2081,7 @@
       const customVal = document.getElementById('minesCustomBet').value;
       const bet = parseInt(customVal, 10) > 0 ? parseInt(customVal, 10) : selectedMinesBet;
       if (!bet || bet < 5) {
-        minesStatusEl.innerHTML = '⚠️ Введи сумму от 5 ⭐';
+        minesStatusEl.innerHTML = '⚠️ Введи сумму от 5 <img src="star.svg" class="star-icon" alt="⭐">';
         return;
       }
       minesStatusEl.innerHTML = '⏳ Ставка принимается...';
@@ -2097,7 +2098,7 @@
           })
         }, 2);
         if (!data.ok) {
-          minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' ⭐)' : '');
+          minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' <img src="star.svg" class="star-icon" alt="⭐">)' : '');
           minesBalanceEl.textContent = data.balance !== undefined ? data.balance : minesBalanceEl.textContent;
           return;
         }
@@ -2115,7 +2116,7 @@
         document.getElementById('minesSetupPanel').style.display = 'none';
         document.getElementById('minesAgain').style.display = 'none';
         document.getElementById('minesScreen').classList.remove('idle');
-        minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' ⭐</b>';
+        minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' <img src="star.svg" class="star-icon" alt="⭐"></b>';
         renderMinesGrid();
         updateMinesUI();
       } catch (e) {
@@ -2230,7 +2231,7 @@
           const t = isNaN(d) ? '' : d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
           return '<div class="profile-pay-item">' +
             '<span class="profile-pay-date">' + t + '</span>' +
-            '<span class="profile-pay-amount">+' + p.amount + ' ⭐</span>' +
+            '<span class="profile-pay-amount">+' + p.amount + ' <img src="star.svg" class="star-icon" alt="⭐"></span>' +
           '</div>';
         }).join('');
       } catch (e) {
