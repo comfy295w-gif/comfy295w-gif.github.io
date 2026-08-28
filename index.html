@@ -535,6 +535,91 @@
     .mines-hist-item .mh-ava img { width: 100%; height: 100%; object-fit: cover; }
     .mines-hist-item .mh-x { font-weight: 800; color: #ffd447; white-space: nowrap; }
 
+    /* === Экран Профиля === */
+    #profileScreen { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
+    .profile-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--card-border);
+    }
+    .profile-header h2 { font-size: 18px; margin: 0; }
+    .profile-body { flex: 1; padding: 24px 16px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .profile-avatar-wrap {
+      position: relative; width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 30px rgba(124,92,255,0.35), 0 8px 24px rgba(0,0,0,0.4);
+      flex-shrink: 0; overflow: hidden;
+    }
+    .profile-avatar-wrap img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+    }
+    .profile-avatar-wrap .profile-initial {
+      font-size: 42px; font-weight: 800; color: #fff; z-index: 1;
+    }
+    .profile-avatar-ring {
+      position: absolute; inset: -4px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.1);
+      pointer-events: none;
+    }
+    .profile-name {
+      font-size: 22px; font-weight: 800; color: #fff; text-align: center;
+    }
+    .profile-username {
+      font-size: 14px; color: var(--muted); text-align: center; margin-top: -6px;
+    }
+    .profile-id {
+      font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;
+    }
+    .profile-balance-card {
+      width: 100%; max-width: 340px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,140,0,0.12));
+      border: 1px solid rgba(255,215,0,0.30);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      backdrop-filter: blur(20px) saturate(160%);
+      border-radius: 22px; padding: 24px; text-align: center;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .profile-balance-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .profile-balance-amount { font-size: 44px; font-weight: 800; color: var(--gold); line-height: 1; }
+    .profile-balance-stars { font-size: 16px; color: var(--gold); opacity: 0.7; margin-top: 4px; }
+    .profile-actions {
+      width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .profile-action-btn {
+      width: 100%; padding: 16px 0; border: none; border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+      background-color: rgba(0,0,0,0.4);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+      backdrop-filter: blur(16px) saturate(150%);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: var(--text); font-size: 16px; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.10), 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .profile-action-btn:active { transform: scale(0.97); background: rgba(124,92,255,0.2); }
+    .profile-action-btn.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent; color: #fff;
+      box-shadow: 0 8px 24px rgba(124,92,255,0.35);
+    }
+    .profile-stat-row {
+      width: 100%; max-width: 340px;
+      display: flex; gap: 10px;
+    }
+    .profile-stat-card {
+      flex: 1;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      background-color: rgba(0,0,0,0.4);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+      backdrop-filter: blur(16px) saturate(150%);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px; padding: 16px; text-align: center;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .profile-stat-value { font-size: 22px; font-weight: 800; color: var(--text); }
+    .profile-stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
     /* === Нижняя панель навигации (жидкое стекло) === */
     .bottom-nav {
       position: fixed;
@@ -995,6 +1080,46 @@
       </div>
       <button class="arena-play-btn" id="arenaPlaceBet">🎯 В игру</button>
       <div id="arenaStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <!-- Экран Профиля -->
+  <div id="profileScreen" style="display:none;">
+    <div class="profile-header">
+      <button class="back-btn" id="profileBack">‹</button>
+      <h2>👤 Профиль</h2>
+      <div></div>
+    </div>
+    <div class="profile-body">
+      <div class="profile-avatar-wrap" id="profileAvatarWrap">
+        <span class="profile-initial" id="profileInitial">?</span>
+        <div class="profile-avatar-ring"></div>
+      </div>
+      <div class="profile-name" id="profileName">Игрок</div>
+      <div class="profile-username" id="profileUsername">@username</div>
+      <div class="profile-id" id="profileId">ID: 0</div>
+
+      <div class="profile-balance-card">
+        <div class="profile-balance-label">Баланс</div>
+        <div class="profile-balance-amount" id="profileBalance">0</div>
+        <div class="profile-balance-stars">Telegram Stars ⭐</div>
+      </div>
+
+      <div class="profile-stat-row">
+        <div class="profile-stat-card">
+          <div class="profile-stat-value" id="profileGamesCount">0</div>
+          <div class="profile-stat-label">Игр</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="profile-stat-value" id="profileWinsCount">0</div>
+          <div class="profile-stat-label">Побед</div>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="profile-action-btn primary" id="profileTopup">⭐ Пополнить баланс</button>
+        <button class="profile-action-btn" id="profileReferral">👥 Пригласить друга</button>
+      </div>
     </div>
   </div>
 
@@ -1991,6 +2116,119 @@
       el.addEventListener('click', openArenaScreen);
     });
     document.getElementById('arenaBack').addEventListener('click', closeArenaScreen);
+
+    // === ПРОФИЛЬ ===
+    const ARENA_BASE_URL = 'https://linguist-cloud-manned.ngrok-free.dev';
+    let profileStatsLoaded = false;
+
+    function openProfileScreen() {
+      document.querySelector('.main').style.display = 'none';
+      document.querySelector('.bottom-nav').style.display = 'none';
+      document.querySelector('.top-bar').style.display = 'none';
+      document.getElementById('profileScreen').style.display = 'flex';
+      fillProfileData();
+    }
+    function closeProfileScreen() {
+      document.getElementById('profileScreen').style.display = 'none';
+      document.querySelector('.main').style.display = '';
+      document.querySelector('.bottom-nav').style.display = '';
+      document.querySelector('.top-bar').style.display = '';
+    }
+
+    function fillProfileData() {
+      try {
+        const u = tg.initDataUnsafe.user;
+        if (!u) return;
+        const name = (u.first_name || '') + (u.last_name ? ' ' + u.last_name : '');
+        document.getElementById('profileName').textContent = name.trim() || 'Игрок';
+        document.getElementById('profileUsername').textContent = u.username ? '@' + u.username : 'Без username';
+        document.getElementById('profileId').textContent = 'ID: ' + u.id;
+        const initial = ((u.first_name || '?').charAt(0) || '?').toUpperCase();
+        document.getElementById('profileInitial').textContent = initial;
+        document.getElementById('profileBalance').textContent = document.getElementById('balanceValue').textContent;
+        // Загружаем аватар
+        const wrap = document.getElementById('profileAvatarWrap');
+        const existingImg = wrap.querySelector('img');
+        if (existingImg) existingImg.remove();
+        if (u.id) {
+          fetch(ARENA_BASE_URL + '/avatar/' + u.id, {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          }).then(async (r) => {
+            if (!r.ok) return;
+            const ct = r.headers.get('Content-Type') || 'image/jpeg';
+            const buf = await r.arrayBuffer();
+            const bytes = new Uint8Array(buf);
+            let bin = '';
+            const chunk = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunk) {
+              bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+            }
+            const b64 = btoa(bin);
+            const img = document.createElement('img');
+            img.src = 'data:' + ct + ';base64,' + b64;
+            img.alt = 'avatar';
+            wrap.insertBefore(img, wrap.firstChild);
+          }).catch(() => {});
+        }
+      } catch (e) {}
+      // Статистика из mines history
+      if (!profileStatsLoaded) loadProfileStats();
+    }
+
+    async function loadProfileStats() {
+      try {
+        const data = await (await fetch(ARENA_BASE_URL + '/mines/history?userId=' + USER_ID, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        })).json();
+        if (data.ok && data.items) {
+          document.getElementById('profileGamesCount').textContent = data.items.length;
+          const wins = data.items.filter((it) => it.result !== 'loss').length;
+          document.getElementById('profileWinsCount').textContent = wins;
+          profileStatsLoaded = true;
+        }
+      } catch (e) {}
+    }
+
+    // Навигация: профиль
+    document.getElementById('profileBack').addEventListener('click', closeProfileScreen);
+    document.getElementById('profileTopup').addEventListener('click', () => {
+      closeProfileScreen();
+      document.getElementById('topupBtn').click();
+    });
+    document.getElementById('profileReferral').addEventListener('click', () => {
+      const botLink = 'https://t.me/' + BOT_USERNAME + '?start=' + USER_ID;
+      if (tg.shareMessage) {
+        tg.shareMessage('Подключись к мини-аппу: ' + botLink);
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(botLink).then(() => {
+          alert('Ссылка скопирована!');
+        });
+      } else {
+        alert(botLink);
+      }
+    });
+
+    // Переключение секций нижней панели
+    function switchNavSection(section) {
+      if (section === 'home' || section === 'tasks' || section === 'games') {
+        // Показываем главный контент
+        closeArenaScreen();
+        minesClose();
+        closeProfileScreen();
+      } else if (section === 'profile') {
+        openProfileScreen();
+      }
+    }
+
+    // Обновляем обработчики навигации
+    navArr.forEach((item) => {
+      item.addEventListener('click', () => {
+        const section = item.dataset.section;
+        if (section === 'profile') {
+          switchNavSection('profile');
+        }
+      });
+    });
   </script>
 </body>
 </html>
