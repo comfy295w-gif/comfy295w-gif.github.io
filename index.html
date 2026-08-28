@@ -167,12 +167,26 @@
     .game-arrow { color: var(--muted); font-size: 24px; line-height: 1; }
 
     /* Карточка Мины: зелёное свечение + превью поля */
-    .game-card-mines { position: relative; overflow: hidden; }
+    .game-card-mines {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(130% 110% at 8% 0%, rgba(140,225,255,0.22), transparent 55%),
+        radial-gradient(150% 120% at 95% 100%, rgba(56,239,125,0.26), transparent 55%);
+      background-color: rgba(0,0,0,0.45);
+    }
     .game-card-mines::after {
       content: '';
-      position: absolute; right: -36px; top: -36px;
-      width: 140px; height: 140px;
-      background: radial-gradient(circle, rgba(56,239,125,0.25), transparent 70%);
+      position: absolute; right: -40px; top: -40px;
+      width: 150px; height: 150px;
+      background: radial-gradient(circle, rgba(56,239,125,0.30), transparent 70%);
+      pointer-events: none;
+    }
+    .game-card-mines::before {
+      content: '';
+      position: absolute; left: -50px; bottom: -60px;
+      width: 150px; height: 150px;
+      background: radial-gradient(circle, rgba(160,235,255,0.28), transparent 70%);
       pointer-events: none;
     }
     .icon-mines { box-shadow: 0 8px 22px rgba(24,190,130,0.4); position: relative; overflow: hidden; }
@@ -182,6 +196,13 @@
       background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4), transparent 55%);
     }
     .icon-mines svg { position: relative; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)); }
+    .cta-btn {
+      font-size: 12px; font-weight: 800; color: #04231a;
+      background: linear-gradient(135deg, #46f59a, #11b292);
+      border: 1px solid rgba(255,255,255,0.45);
+      padding: 6px 14px; border-radius: 11px; white-space: nowrap;
+      box-shadow: 0 6px 16px rgba(25,205,150,0.4), inset 0 1px 1px rgba(255,255,255,0.5);
+    }
     .game-mini { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
     .mini-cell {
       width: 26px; height: 26px; border-radius: 8px;
@@ -192,13 +213,6 @@
     }
     .mini-cell.bomb-mini { background: rgba(255,80,80,0.16); border-color: rgba(255,80,80,0.4); }
     .game-cta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    .cta-x {
-      font-size: 12px; font-weight: 800; color: #ffd700;
-      background: rgba(255,215,0,0.12);
-      border: 1px solid rgba(255,215,0,0.4);
-      padding: 4px 9px; border-radius: 9px;
-      white-space: nowrap;
-    }
 
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
     .icon-mines     { background: linear-gradient(135deg,#38ef7d,#11998e); }
@@ -692,7 +706,7 @@
           </div>
         </div>
         <div class="game-cta">
-          <span class="cta-x">x растёт</span>
+          <span class="cta-btn">Играть</span>
           <div class="game-arrow">›</div>
         </div>
       </div>
