@@ -1001,51 +1001,12 @@
       <div></div>
     </div>
     <div class="mines-body">
-      <!-- Ледяная карточка-баннер -->
-      <div class="mines-hero" id="minesHeroPlay">
-        <img src="mines_card.png" alt="Мины">
-      </div>
-
-      <div class="mines-balance"><img src="star.png" class="star-icon" alt="⭐"> Баланс: <span id="minesBalance">0</span></div>
-
-      <div class="mines-panel" id="minesSetupPanel">
-        <div class="mines-row">
-          <span class="mines-label">Мин на поле</span>
-          <div class="mines-chips" id="mineCountChips">
-            <button class="mines-chip selected" data-mines="3">3</button>
-            <button class="mines-chip" data-mines="5">5</button>
-            <button class="mines-chip" data-mines="8">8</button>
-            <button class="mines-chip" data-mines="13">13</button>
-          </div>
-        </div>
-        <div class="mines-row">
-          <span class="mines-label">Ставка <img src="star.png" class="star-icon" alt="⭐"></span>
-          <div class="mines-chips" id="minesBetChips">
-            <button class="mines-chip selected" data-bet="100">100</button>
-            <button class="mines-chip" data-bet="250">250</button>
-            <button class="mines-chip" data-bet="500">500</button>
-            <button class="mines-chip" data-bet="1000">1000</button>
-          </div>
-        </div>
-        <input class="mines-custom" id="minesCustomBet" inputmode="numeric" type="number" min="5" placeholder="Своя сумма (от 5 ⭐)">
-        <div id="minesStartWrap">
-          <button class="arena-play-btn" id="minesStart">🎯 В игру</button>
-        </div>
-      </div>
-
-      <div class="mines-info">
-        <div>
-          <div class="mines-mult"><small>Множитель</small><span id="minesMult">1.00</span>x</div>
-          <div class="mines-expected">Заберёшь: <span id="minesPayout">0</span> <img src="star.png" class="star-icon" alt="⭐"></div>
-        </div>
-        <button class="mines-cash-btn" id="minesCashout" disabled>💎 Забрать</button>
-      </div>
       <div class="mines-grid" id="minesGrid"></div>
-      <div class="mines-status" id="minesStatus">Сделай ставку, чтобы начать раунд</div>
-      <div style="text-align:center; margin-top:14px;">
-        <button class="mines-new-btn" id="minesAgain" style="display:none;">🔄 Новая игра</button>
+      <div class="mines-size-row" style="margin-top:12px; display:flex; gap:8px; justify-content:flex-start;">
+        <button class="mines-chip selected" data-size="5">5×5</button>
+        <button class="mines-chip" data-size="4">4×4</button>
       </div>
-      <div style="margin-top:12px;">
+      <div style="margin-top:16px;">
         <div style="display:flex; gap:8px;">
           <button class="mines-tab" id="minesTabHistory">📜 История</button>
           <button class="mines-tab" id="minesTabLeader">🏆 Топ иксы</button>
@@ -1753,11 +1714,12 @@
 
     // === ИГРА МИНЫ ===
     const MINES_API = ARENA_BASE + '/mines';
-    const MROWS = 5, MCOLS = 5, MCELLS = MROWS * MCOLS;
+    let MROWS = 5, MCOLS = 5, MCELLS = MROWS * MCOLS;
     const minesState = { playing: false, bet: 100, mineCount: 3, minesSet: [], opened: 0, mult: 1, payout: 0 };
 
     const minesBalanceEl = document.getElementById('minesBalance');
-    const minesStatusEl = document.getElementById('minesStatus');
+    const minesStatusEl2 = document.getElementById('minesStatus'); // dummy
+    // minesStatusEl already declared above
     const minesGridEl = document.getElementById('minesGrid');
 
     function minesOpen() {
@@ -1767,7 +1729,7 @@
       document.getElementById('minesScreen').style.display = 'flex';
       document.getElementById('minesScreen').classList.add('idle');
       minesState.playing = false;
-      minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
+      if(minesStatusEl) if(minesStatusEl) minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
       renderMinesGrid();
       updateMinesUI();
       refreshMinesBalance();
@@ -1786,7 +1748,7 @@
         });
         const data = await res.json();
         if (data.ok) {
-          minesBalanceEl.textContent = data.balance;
+          if(minesBalanceEl) if(minesBalanceEl) if(minesBalanceEl) minesBalanceEl.textContent = data.balance;
           document.getElementById('balanceValue').textContent = data.balance;
         }
       } catch (e) {}
@@ -1810,7 +1772,14 @@
       return m;
     }
 
+    function setMinesFieldSize(n){
+      MROWS=n; MCOLS=n; MCELLS=n*n;
+      const g=document.getElementById('minesGrid'); if(g) g.style.gridTemplateColumns='repeat('+n+', 1fr)';
+      renderMinesGrid();
+      document.querySelectorAll('.mines-size-row .mines-chip').forEach(b=>b.classList.toggle('selected', Number(b.dataset.size)===n));
+    }
     function renderMinesGrid() {
+      const gridEl=document.getElementById('minesGrid'); if(gridEl) gridEl.style.gridTemplateColumns='repeat('+MCOLS+', 1fr)';
       let html = '';
       for (let i = 0; i < MCELLS; i++) {
         html += '<button class="mines-cell" data-i="' + i + '"></button>';
@@ -1823,10 +1792,9 @@
     }
 
     function updateMinesUI() {
-      document.getElementById('minesMult').textContent = minesState.mult.toFixed(2);
-      const payoutEl = document.getElementById('minesPayout');
-      payoutEl.textContent = minesState.playing ? Math.floor(minesState.bet * minesState.mult) : 0;
-      document.getElementById('minesCashout').disabled = minesState.opened === 0 || !minesState.playing;
+      const _mm = document.getElementById('minesMult'); if(_mm) _mm.textContent = minesState.mult.toFixed(2);
+      const payoutEl = document.getElementById('minesPayout'); if(payoutEl) payoutEl.textContent = minesState.playing ? Math.floor(minesState.bet * minesState.mult) : 0;
+      { const _cc = document.getElementById('minesCashout'); if(_cc) _cc.disabled = minesState.opened === 0 || !minesState.playing; }
     }
 
     function minesGetNick() {
@@ -1866,8 +1834,8 @@
           c.textContent = '💣';
         }
       });
-      document.getElementById('minesCashout').disabled = true;
-      document.getElementById('minesAgain').style.display = '';
+      { const _cc2 = document.getElementById('minesCashout'); if(_cc2) _cc2.disabled = true; }
+      { const _ma = document.getElementById('minesAgain'); if(_ma) _ma.style.display = ''; }
     }
 
     async function minesReveal(i) {
@@ -1882,7 +1850,7 @@
         minesState.payout = 0;
         minesSetGameOver();
         minesReportResult('loss');
-        minesStatusEl.innerHTML = '💥 Бум! Ты нарвался на мину. Ставка <b>' + minesState.bet + ' <img src="star.png" class="star-icon" alt="⭐"></b> сгорела.';
+        if(minesStatusEl) minesStatusEl.innerHTML = '💥 Бум! Ты нарвался на мину. Ставка <b>' + minesState.bet + ' <img src="star.png" class="star-icon" alt="⭐"></b> сгорела.';
         refreshMinesBalance();
         return;
       }
@@ -1901,7 +1869,7 @@
         minesCashout(true);
         return;
       }
-      minesStatusEl.innerHTML = 'Открыто: <b>' + minesState.opened + '</b> · Осталось безопасных: <b>' +
+      if(minesStatusEl) minesStatusEl.innerHTML = 'Открыто: <b>' + minesState.opened + '</b> · Осталось безопасных: <b>' +
         (MCELLS - minesState.mineCount - minesState.opened) + '</b>';
     }
 
@@ -1917,19 +1885,19 @@
           body: JSON.stringify({ userId: myUserId, amount: win })
         }, 2);
         if (data.ok) {
-          minesBalanceEl.textContent = data.balance;
+          if(minesBalanceEl) minesBalanceEl.textContent = data.balance;
           document.getElementById('balanceValue').textContent = data.balance;
           minesReportResult(auto ? 'win' : 'cashout');
-          minesStatusEl.innerHTML = auto
+          if(minesStatusEl) minesStatusEl.innerHTML = auto
             ? '🎉 Открыты все безопасные клетки! Выигрыш <b>' + win + ' <img src="star.png" class="star-icon" alt="⭐"></b> зачислен.'
             : '💎 Забрал <b>' + win + ' <img src="star.png" class="star-icon" alt="⭐"></b> (x' + minesState.mult.toFixed(2) + '). Ставка ' + minesState.bet + ' <img src="star.png" class="star-icon" alt="⭐"> + выигрыш зачислены.';
         } else {
-          minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка выплаты');
+          if(minesStatusEl) minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка выплаты');
         }
       } catch (e) {
-        minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми "Забрать" ещё раз.';
+        if(minesStatusEl) minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми "Забрать" ещё раз.';
       }
-      document.getElementById('minesAgain').style.display = '';
+      { const _ma = document.getElementById('minesAgain'); if(_ma) _ma.style.display = ''; }
     }
 
     // Повтор запроса при мгновенном сбое сети (2 попытки)
@@ -1950,30 +1918,10 @@
     };
 
     let selectedMineCount = 3;
-    document.querySelectorAll('#mineCountChips .mines-chip').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#mineCountChips .mines-chip').forEach((b) => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedMineCount = Number(btn.dataset.mines);
-      });
-    });
-
-    // Выбор ставки (пресеты/своя)
     let selectedMinesBet = 100;
-    document.querySelectorAll('#minesBetChips .mines-chip').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#minesBetChips .mines-chip').forEach((b) => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedMinesBet = Number(btn.dataset.bet);
-        document.getElementById('minesCustomBet').value = '';
-      });
-    });
-    document.getElementById('minesCustomBet').addEventListener('input', () => {
-      const v = parseInt(document.getElementById('minesCustomBet').value, 10);
-      if (!isNaN(v) && v > 0) {
-        selectedMinesBet = v;
-        document.querySelectorAll('#minesBetChips .mines-chip').forEach((b) => b.classList.remove('selected'));
-      }
+    // Размер поля: 4x4 / 5x5 (кнопки такие же как mines-chip)
+    document.querySelectorAll('.mines-size-row .mines-chip').forEach((btn)=>{
+      btn.addEventListener('click',()=> setMinesFieldSize(Number(btn.dataset.size)));
     });
 
     function minesEscapeHtml(s) {
@@ -2071,20 +2019,20 @@
     document.getElementById('minesTabLeader').addEventListener('click', () => minesActivateTab('leader'));
 
     // Кнопка "Играть" на баннере: ведёт к полю
-    document.getElementById('minesHeroPlay').addEventListener('click', () => {
+    (document.getElementById('minesHeroPlay')||{addEventListener:()=>{}}).addEventListener('click', () => {
       document.getElementById('minesGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      minesStatusEl.innerHTML = '👆 Выбери мин на поле и сделай ставку';
+      if(minesStatusEl) minesStatusEl.innerHTML = '👆 Выбери мин на поле и сделай ставку';
     });
 
     // Кнопка "В игру": списываем ставку и генерируем поле
-    document.getElementById('minesStart').addEventListener('click', async () => {
-      const customVal = document.getElementById('minesCustomBet').value;
+    (document.getElementById('minesStart')||{addEventListener:()=>{}}).addEventListener('click', async () => {
+      const customVal = (document.getElementById('minesCustomBet')?.value||'');
       const bet = parseInt(customVal, 10) > 0 ? parseInt(customVal, 10) : selectedMinesBet;
       if (!bet || bet < 5) {
-        minesStatusEl.innerHTML = '⚠️ Введи сумму от 5 <img src="star.png" class="star-icon" alt="⭐">';
+        if(minesStatusEl) minesStatusEl.innerHTML = '⚠️ Введи сумму от 5 <img src="star.png" class="star-icon" alt="⭐">';
         return;
       }
-      minesStatusEl.innerHTML = '⏳ Ставка принимается...';
+      if(minesStatusEl) minesStatusEl.innerHTML = '⏳ Ставка принимается...';
       try {
         const data = await minesFetch(MINES_API + '/bet', {
           method: 'POST',
@@ -2098,11 +2046,11 @@
           })
         }, 2);
         if (!data.ok) {
-          minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' <img src="star.png" class="star-icon" alt="⭐">)' : '');
-          minesBalanceEl.textContent = data.balance !== undefined ? data.balance : minesBalanceEl.textContent;
+          if(minesStatusEl) minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' <img src="star.png" class="star-icon" alt="⭐">)' : '');
+          if(minesBalanceEl) minesBalanceEl.textContent = data.balance !== undefined ? data.balance : if(minesBalanceEl) minesBalanceEl.textContent;
           return;
         }
-        minesBalanceEl.textContent = data.balance;
+        if(minesBalanceEl) minesBalanceEl.textContent = data.balance;
         document.getElementById('balanceValue').textContent = data.balance;
 
         minesState.bet = bet;
@@ -2114,25 +2062,25 @@
         minesState.playing = true;
 
         document.getElementById('minesSetupPanel').style.display = 'none';
-        document.getElementById('minesAgain').style.display = 'none';
+        { const _ma2 = document.getElementById('minesAgain'); if(_ma2) _ma2.style.display = 'none'; }
         document.getElementById('minesScreen').classList.remove('idle');
-        minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' <img src="star.png" class="star-icon" alt="⭐"></b>';
+        if(minesStatusEl) minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' <img src="star.png" class="star-icon" alt="⭐"></b>';
         renderMinesGrid();
         updateMinesUI();
       } catch (e) {
-        minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми ещё раз.';
+        if(minesStatusEl) minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми ещё раз.';
       }
     });
 
-    document.getElementById('minesCashout').addEventListener('click', () => minesCashout(false));
+    (document.getElementById('minesCashout')||{addEventListener:()=>{}}).addEventListener('click', () => minesCashout(false));
 
     // Новая игра: возврат к настройкам ставки
-    document.getElementById('minesAgain').addEventListener('click', () => {
+    (document.getElementById('minesAgain')||{addEventListener:()=>{}}).addEventListener('click', () => {
       document.getElementById('minesSetupPanel').style.display = '';
       minesState.playing = false;
       minesState.mult = 1;
       document.getElementById('minesScreen').classList.add('idle');
-      minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
+      if(minesStatusEl) minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
       renderMinesGrid();
       updateMinesUI();
       refreshMinesBalance();
