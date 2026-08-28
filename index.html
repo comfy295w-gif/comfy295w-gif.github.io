@@ -164,7 +164,41 @@
     .game-info { flex: 1; min-width: 0; }
     .game-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
     .game-desc { font-size: 13px; color: var(--muted); }
-    .game-arrow { color: var(--muted); font-size: 24px; }
+    .game-arrow { color: var(--muted); font-size: 24px; line-height: 1; }
+
+    /* Карточка Мины: зелёное свечение + превью поля */
+    .game-card-mines { position: relative; overflow: hidden; }
+    .game-card-mines::after {
+      content: '';
+      position: absolute; right: -36px; top: -36px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(56,239,125,0.25), transparent 70%);
+      pointer-events: none;
+    }
+    .icon-mines { box-shadow: 0 8px 22px rgba(24,190,130,0.4); position: relative; overflow: hidden; }
+    .icon-mines::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4), transparent 55%);
+    }
+    .icon-mines svg { position: relative; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)); }
+    .game-mini { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+    .mini-cell {
+      width: 26px; height: 26px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      background: rgba(56,239,125,0.14);
+      border: 1px solid rgba(56,239,125,0.35);
+    }
+    .mini-cell.bomb-mini { background: rgba(255,80,80,0.16); border-color: rgba(255,80,80,0.4); }
+    .game-cta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .cta-x {
+      font-size: 12px; font-weight: 800; color: #ffd700;
+      background: rgba(255,215,0,0.12);
+      border: 1px solid rgba(255,215,0,0.4);
+      padding: 4px 9px; border-radius: 9px;
+      white-space: nowrap;
+    }
 
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
     .icon-mines     { background: linear-gradient(135deg,#38ef7d,#11998e); }
@@ -416,6 +450,61 @@
       box-shadow: 0 6px 18px rgba(124,92,255,0.35);
     }
 
+    /* === Ледяная карточка-баннер Мины === */
+    .mines-hero {
+      position: relative;
+      width: 100%;
+      margin: 0 auto 14px;
+      aspect-ratio: 10 / 7;
+      border-radius: 26px;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 80% at 12% 0%, rgba(140,225,255,0.30), transparent 55%),
+        radial-gradient(130% 90% at 92% 100%, rgba(56,239,125,0.28), transparent 55%),
+        linear-gradient(160deg, rgba(190,240,255,0.12), rgba(110,170,215,0.04));
+      background-color: rgba(0,0,0,0.35);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      backdrop-filter: blur(22px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.4),
+        inset 0 -10px 26px rgba(90,170,255,0.12),
+        0 16px 40px rgba(0,0,0,0.55);
+    }
+    .mines-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .mines-hero-scrim {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(4,8,16,0.62), rgba(4,8,16,0.05) 62%);
+      pointer-events: none;
+    }
+    .mines-hero-content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; align-items: stretch;
+      gap: 6px; padding: 16px;
+    }
+    .mines-hero-title {
+      font-size: 42px; font-weight: 900; letter-spacing: 3px; line-height: 1;
+      color: #ffffff;
+      text-shadow: 0 3px 14px rgba(0,0,0,0.6), 0 0 24px rgba(140,220,255,0.35);
+    }
+    .mines-hero-sub {
+      font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.88);
+      text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    }
+    .mines-hero-play {
+      margin-top: 10px;
+      width: 100%;
+      border: none; border-radius: 16px;
+      padding: 15px 0;
+      background: linear-gradient(135deg, #46f59a, #11b292);
+      color: #04231a; font-size: 20px; font-weight: 900; letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(25,205,150,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
+      transition: transform 0.12s;
+    }
+    .mines-hero-play:active { transform: scale(0.97); }
+
     /* === Нижняя панель навигации (жидкое стекло) === */
     .bottom-nav {
       position: fixed;
@@ -555,18 +644,27 @@
         <div class="game-arrow">›</div>
       </div>
 
-      <div class="game-card" data-open="mines">
+      <div class="game-card game-card-mines" data-open="mines">
         <div class="game-icon icon-mines">
           <svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="30" cy="42" r="17"/>
+            <circle cx="30" cy="42" r="17" fill="rgba(255,255,255,0.18)"/>
             <path d="M42 20 C46 15 50 13 54 14"/>
+            <path class="bomb-spark" d="M54 11 L55.5 15 L59.5 16.5 L55.5 18 L54 22 L52.5 18 L48.5 16.5 L52.5 15 Z" fill="#fff" stroke="none"/>
           </svg>
         </div>
         <div class="game-info">
           <div class="game-name">Мины</div>
-          <div class="game-desc">Открывай клетки, расти x и забирай</div>
+          <div class="game-desc">Открывай клетки, расти множитель</div>
+          <div class="game-mini">
+            <span class="mini-cell">⭐</span>
+            <span class="mini-cell">⭐</span>
+            <span class="mini-cell bomb-mini">💣</span>
+          </div>
         </div>
-        <div class="game-arrow">›</div>
+        <div class="game-cta">
+          <span class="cta-x">x растёт</span>
+          <div class="game-arrow">›</div>
+        </div>
       </div>
 
       <div class="game-card" data-open="arena">
@@ -620,6 +718,120 @@
       <div></div>
     </div>
     <div class="mines-body">
+      <!-- Ледяная карточка-баннер -->
+      <div class="mines-hero">
+        <svg class="mines-hero-bg" viewBox="0 0 340 220" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="mhGreen" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#5ffb9a"/><stop offset="1" stop-color="#15b8a3"/>
+            </linearGradient>
+            <linearGradient id="mhGold" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffe28a"/><stop offset="1" stop-color="#ff9d3c"/>
+            </linearGradient>
+            <radialGradient id="mhBomb" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="rgba(255,85,85,0.6)"/><stop offset="1" stop-color="rgba(255,85,85,0)"/>
+            </radialGradient>
+            <radialGradient id="mhShine" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="rgba(160,235,255,0.5)"/><stop offset="1" stop-color="rgba(160,235,255,0)"/>
+            </radialGradient>
+            <path id="mhSpark" d="M0 -8 L2.4 -2.4 L8 0 L2.4 2.4 L0 8 L-2.4 2.4 L-8 0 L-2.4 -2.4 Z"/>
+          </defs>
+
+          <!-- лёд / свечение -->
+          <circle cx="120" cy="60" r="95" fill="url(#mhShine)"/>
+          <circle cx="265" cy="185" r="80" fill="url(#mhGreen)"/>
+          <circle cx="205" cy="40" r="60" fill="url(#mhGold)"/>
+
+          <!-- поле 5x4 -->
+          <!-- (0,0) safe -->
+          <rect x="110" y="16" width="26" height="26" rx="7" fill="url(#mhGreen)"/>
+          <text x="123" y="34" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (1,0) glass -->
+          <rect x="144" y="16" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+          <!-- (2,0) safe -->
+          <rect x="178" y="16" width="26" height="26" rx="7" fill="url(#mhGreen)"/>
+          <text x="191" y="34" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (3,0) glass -->
+          <rect x="212" y="16" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+          <!-- (4,0) safe gold -->
+          <rect x="246" y="16" width="26" height="26" rx="7" fill="url(#mhGold)"/>
+          <text x="259" y="34" font-size="15" text-anchor="middle">⭐</text>
+
+          <!-- (0,1) glass -->
+          <rect x="110" y="50" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+          <!-- (1,1) safe gold -->
+          <rect x="144" y="50" width="26" height="26" rx="7" fill="url(#mhGold)"/>
+          <text x="157" y="68" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (2,1) glass -->
+          <rect x="178" y="50" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+          <!-- (3,1) safe -->
+          <rect x="212" y="50" width="26" height="26" rx="7" fill="url(#mhGreen)"/>
+          <text x="225" y="68" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (4,1) glass -->
+          <rect x="246" y="50" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+
+          <!-- (0,2) safe gold -->
+          <rect x="110" y="84" width="26" height="26" rx="7" fill="url(#mhGold)"/>
+          <text x="123" y="102" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (1,2) bomb -->
+          <circle cx="157" cy="97" r="17" fill="url(#mhBomb)"/>
+          <rect x="144" y="84" width="26" height="26" rx="7" fill="rgba(255,90,90,0.35)" stroke="rgba(255,80,80,0.55)" stroke-width="1.2"/>
+          <circle cx="157" cy="97" r="8.5" fill="#2b2b36" stroke="rgba(255,120,120,0.9)" stroke-width="1.6"/>
+          <circle cx="154" cy="94" r="2.6" fill="rgba(255,255,255,0.5)"/>
+          <text x="157" y="101" font-size="12" text-anchor="middle">💣</text>
+          <!-- (2,2) glass -->
+          <rect x="178" y="84" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+          <!-- (3,2) safe gold -->
+          <rect x="212" y="84" width="26" height="26" rx="7" fill="url(#mhGold)"/>
+          <text x="225" y="102" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (4,2) safe -->
+          <rect x="246" y="84" width="26" height="26" rx="7" fill="url(#mhGreen)"/>
+          <text x="259" y="102" font-size="15" text-anchor="middle">⭐</text>
+
+          <!-- (0,3) bomb -->
+          <circle cx="123" cy="131" r="16" fill="url(#mhBomb)"/>
+          <rect x="110" y="118" width="26" height="26" rx="7" fill="rgba(255,90,90,0.35)" stroke="rgba(255,80,80,0.55)" stroke-width="1.2"/>
+          <circle cx="123" cy="131" r="8.5" fill="#2b2b36" stroke="rgba(255,120,120,0.9)" stroke-width="1.6"/>
+          <circle cx="120" cy="128" r="2.6" fill="rgba(255,255,255,0.5)"/>
+          <text x="123" y="135" font-size="12" text-anchor="middle">💣</text>
+          <!-- (1,3) safe -->
+          <rect x="144" y="118" width="26" height="26" rx="7" fill="url(#mhGreen)"/>
+          <text x="157" y="136" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (2,3) safe gold -->
+          <rect x="178" y="118" width="26" height="26" rx="7" fill="url(#mhGold)"/>
+          <text x="191" y="136" font-size="15" text-anchor="middle">⭐</text>
+          <!-- (3,3) glass -->
+          <rect x="212" y="118" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+          <!-- (4,3) bomb -->
+          <circle cx="259" cy="131" r="16" fill="url(#mhBomb)"/>
+          <rect x="246" y="118" width="26" height="26" rx="7" fill="rgba(255,90,90,0.35)" stroke="rgba(255,80,80,0.55)" stroke-width="1.2"/>
+          <circle cx="259" cy="131" r="8.5" fill="#2b2b36" stroke="rgba(255,120,120,0.9)" stroke-width="1.6"/>
+          <circle cx="256" cy="128" r="2.6" fill="rgba(255,255,255,0.5)"/>
+          <text x="259" y="135" font-size="12" text-anchor="middle">💣</text>
+
+          <!-- парящие искры -->
+          <use href="#mhSpark" x="302" y="10" fill="#ffe28a"/>
+          <use href="#mhSpark" x="330" y="72" fill="#ffffff"/>
+          <use href="#mhSpark" x="98" y="6" fill="#ffffff"/>
+          <use href="#mhSpark" x="288" y="170" fill="#ffe28a"/>
+          <use href="#mhSpark" x="338" y="190" fill="#5ffb9a"/>
+
+          <!-- снег / лёд -->
+          <circle cx="308" cy="120" r="2" fill="#fff" opacity="0.6"/>
+          <circle cx="286" cy="40" r="1.6" fill="#fff" opacity="0.5"/>
+          <circle cx="70" cy="30" r="2" fill="#fff" opacity="0.5"/>
+          <circle cx="52" cy="90" r="1.6" fill="#fff" opacity="0.55"/>
+          <circle cx="84" cy="150" r="2" fill="#fff" opacity="0.5"/>
+          <circle cx="44" cy="188" r="1.6" fill="#fff" opacity="0.45"/>
+        </svg>
+        <div class="mines-hero-scrim"></div>
+        <div class="mines-hero-content">
+          <div class="mines-hero-title">МИНЫ</div>
+          <div class="mines-hero-sub">Открывай ячейки и избегай мин</div>
+          <button class="mines-hero-play" id="minesHeroPlay">Играть</button>
+        </div>
+      </div>
+
       <div class="mines-balance">⭐ Баланс: <span id="minesBalance">0</span></div>
 
       <div class="mines-panel" id="minesSetupPanel">
@@ -1335,6 +1547,12 @@
         selectedMinesBet = v;
         document.querySelectorAll('#minesBetChips .mines-chip').forEach((b) => b.classList.remove('selected'));
       }
+    });
+
+    // Кнопка "Играть" на баннере: ведёт к полю
+    document.getElementById('minesHeroPlay').addEventListener('click', () => {
+      document.getElementById('minesGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      minesStatusEl.innerHTML = '👆 Выбери мин на поле и сделай ставку';
     });
 
     // Кнопка "В игру": списываем ставку и генерируем поле
