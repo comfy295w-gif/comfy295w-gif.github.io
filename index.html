@@ -378,6 +378,8 @@
       margin: 0 auto;
     }
     .mines-grid.ended .mines-cell { pointer-events: none; }
+    /* Поле видно всегда, но пока не играешь - призрачное */
+    #minesScreen.idle .mines-cell { pointer-events: none; opacity: 0.5; }
     .mines-cell {
       aspect-ratio: 1 / 1;
       border-radius: 14px;
@@ -645,19 +647,17 @@
         </div>
       </div>
 
-      <div id="minesRound" style="display:none;">
-        <div class="mines-info">
-          <div>
-            <div class="mines-mult"><small>Множитель</small><span id="minesMult">1.00</span>x</div>
-            <div class="mines-expected">Заберёшь: <span id="minesPayout">0</span> ⭐</div>
-          </div>
-          <button class="mines-cash-btn" id="minesCashout">💎 Забрать</button>
+      <div class="mines-info">
+        <div>
+          <div class="mines-mult"><small>Множитель</small><span id="minesMult">1.00</span>x</div>
+          <div class="mines-expected">Заберёшь: <span id="minesPayout">0</span> ⭐</div>
         </div>
-        <div class="mines-grid" id="minesGrid"></div>
-        <div class="mines-status" id="minesStatus"></div>
-        <div style="text-align:center; margin-top:14px;">
-          <button class="mines-new-btn" id="minesAgain" style="display:none;">🔄 Новая игра</button>
-        </div>
+        <button class="mines-cash-btn" id="minesCashout" disabled>💎 Забрать</button>
+      </div>
+      <div class="mines-grid" id="minesGrid"></div>
+      <div class="mines-status" id="minesStatus">Сделай ставку, чтобы начать раунд</div>
+      <div style="text-align:center; margin-top:14px;">
+        <button class="mines-new-btn" id="minesAgain" style="display:none;">🔄 Новая игра</button>
       </div>
     </div>
   </div>
@@ -1172,6 +1172,11 @@
       document.querySelector('.bottom-nav').style.display = 'none';
       document.querySelector('.top-bar').style.display = 'none';
       document.getElementById('minesScreen').style.display = 'flex';
+      document.getElementById('minesScreen').classList.add('idle');
+      minesState.playing = false;
+      minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
+      renderMinesGrid();
+      updateMinesUI();
       refreshMinesBalance();
     }
     function minesClose() {
@@ -1226,7 +1231,8 @@
 
     function updateMinesUI() {
       document.getElementById('minesMult').textContent = minesState.mult.toFixed(2);
-      document.getElementById('minesPayout').textContent = Math.floor(minesState.bet * minesState.mult);
+      const payoutEl = document.getElementById('minesPayout');
+      payoutEl.textContent = minesState.playing ? Math.floor(minesState.bet * minesState.mult) : 0;
       document.getElementById('minesCashout').disabled = minesState.opened === 0 || !minesState.playing;
     }
 
@@ -1368,8 +1374,8 @@
         minesState.playing = true;
 
         document.getElementById('minesSetupPanel').style.display = 'none';
-        document.getElementById('minesRound').style.display = '';
         document.getElementById('minesAgain').style.display = 'none';
+        document.getElementById('minesScreen').classList.remove('idle');
         minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' ⭐</b>';
         renderMinesGrid();
         updateMinesUI();
@@ -1382,9 +1388,13 @@
 
     // Новая игра: возврат к настройкам ставки
     document.getElementById('minesAgain').addEventListener('click', () => {
-      document.getElementById('minesRound').style.display = 'none';
       document.getElementById('minesSetupPanel').style.display = '';
-      minesStatusEl.innerHTML = '';
+      minesState.playing = false;
+      minesState.mult = 1;
+      document.getElementById('minesScreen').classList.add('idle');
+      minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
+      renderMinesGrid();
+      updateMinesUI();
       refreshMinesBalance();
     });
 
