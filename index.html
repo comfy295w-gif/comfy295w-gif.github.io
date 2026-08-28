@@ -187,6 +187,27 @@
       border-radius: 16px;
     }
 
+    /* Карточка Апгрейд — широкий баннер */
+    .game-card-upgrade {
+      position: relative;
+      overflow: hidden;
+      flex: none;
+      height: 200px;
+      padding: 0 !important;
+      margin: 0 -16px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .game-card-upgrade img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
     .icon-arena     { background: linear-gradient(135deg,#a18cd1,#fbc2eb); }
     .icon-contest   { background: linear-gradient(135deg,#f7971e,#ffd200); }
@@ -606,19 +627,8 @@
 
     <!-- Игры -->
     <div id="games" class="tab-content">
-      <div class="game-card">
-        <div class="game-icon icon-upgrade">
-          <svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 36 L21 24 L29 30 L39 15"/>
-            <path d="M39 15 h-7 M39 15 v7"/>
-            <line x1="24" y1="42" x2="40" y2="42"/>
-          </svg>
-        </div>
-        <div class="game-info">
-          <div class="game-name">Апгрейд</div>
-          <div class="game-desc">Прокачай профиль и звания</div>
-        </div>
-        <div class="game-arrow">›</div>
+      <div class="game-card game-card-upgrade">
+        <img src="upgrade_card.png" alt="Апгрейд">
       </div>
 
       <div class="game-card game-card-mines" data-open="mines">
