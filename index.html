@@ -1072,7 +1072,7 @@
     // Адрес сервера бота (через ngrok туннель)
     const ARENA_API = 'https://linguist-cloud-manned.ngrok-free.dev/api/arena';
     const ARENA_BASE = ARENA_API.replace(/\/arena$/, '');
-    function avatarUrl(userId) { return ARENA_BASE + '/api/avatar/' + userId; }
+    function avatarUrl(userId) { return ARENA_BASE + '/avatar/' + userId; }
 
     // ngrok отдаёт предупреждение вместо картинки, если в запросе нет заголовка
     // ngrok-skip-browser-warning. Обычный <img> его не шлёт, поэтому грузим аватар
