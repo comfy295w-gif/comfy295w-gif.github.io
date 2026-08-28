@@ -143,10 +143,12 @@
       align-items: center;
       gap: 18px;
       cursor: pointer;
-      transition: transform 0.15s, border-color 0.2s;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s, box-shadow 0.3s;
       box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.45);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
-    .game-card:active { transform: scale(0.98); }
+    .game-card:active { transform: scale(0.96); box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.5); }
     .game-card:hover { border-color: rgba(255,255,255,0.22); }
     .game-icon {
       width: 72px;
@@ -178,7 +180,10 @@
       border-radius: 0;
       background: transparent;
       box-shadow: none;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+      cursor: pointer;
     }
+    .game-card-mines:active { transform: scale(0.97); }
     .game-card-mines img {
       display: block;
       width: 100%;
@@ -199,7 +204,10 @@
       border-radius: 0;
       background: transparent;
       box-shadow: none;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+      cursor: pointer;
     }
+    .game-card-upgrade:active { transform: scale(0.97); }
     .game-card-upgrade img {
       display: block;
       width: 100%;
@@ -220,7 +228,10 @@
       border-radius: 0;
       background: transparent;
       box-shadow: none;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s;
+      cursor: pointer;
     }
+    .game-card-arena:active { transform: scale(0.97); }
     .game-card-arena img {
       display: block;
       width: 100%;
@@ -709,6 +720,83 @@
       90% { opacity: 0.8; }
       100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
     }
+
+    /* === Модалка пополнения === */
+    #topup-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+    #topup-overlay.show { opacity: 1; visibility: visible; }
+    #topup-modal {
+      width: 90%; max-width: 340px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      background-color: rgba(10,15,30,0.95);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 24px;
+      padding: 28px 24px;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 20px 50px rgba(0,0,0,0.6);
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #topup-overlay.show #topup-modal { transform: scale(1) translateY(0); }
+    .topup-title {
+      text-align: center; font-size: 20px; font-weight: 800; margin-bottom: 6px;
+      color: #fff;
+    }
+    .topup-sub {
+      text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 20px;
+    }
+    .topup-input-wrap {
+      position: relative; margin-bottom: 16px;
+    }
+    .topup-input-wrap input {
+      width: 100%; padding: 16px 50px 16px 20px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff; font-size: 22px; font-weight: 800; text-align: center;
+      outline: none; font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .topup-input-wrap input:focus { border-color: var(--accent); }
+    .topup-input-wrap input::placeholder { color: var(--muted); font-weight: 600; font-size: 16px; }
+    .topup-stars-icon {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 24px; pointer-events: none;
+    }
+    .topup-presets {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px;
+    }
+    .topup-preset {
+      padding: 10px 0; border-radius: 12px; text-align: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+    }
+    .topup-preset:active { transform: scale(0.95); }
+    .topup-preset:hover { background: rgba(124,92,255,0.25); border-color: rgba(124,92,255,0.5); }
+    .topup-pay-btn {
+      width: 100%; padding: 16px 0; border: none; border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-size: 17px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 8px 24px rgba(124,92,255,0.4);
+      transition: transform 0.15s;
+    }
+    .topup-pay-btn:active { transform: scale(0.97); }
+    .topup-pay-btn:disabled { opacity: 0.4; }
+    .topup-close {
+      display: block; margin: 12px auto 0; background: none; border: none;
+      color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer;
+      padding: 8px 16px;
+    }
   </style>
 </head>
 <body>
@@ -736,6 +824,28 @@
       </svg>
       <div id="splash-text">ЗАГРУЗКА...</div>
       <div id="splash-bar-wrap"><div id="splash-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- Модалка пополнения -->
+  <div id="topup-overlay">
+    <div id="topup-modal">
+      <div class="topup-title">Пополнить звёздами</div>
+      <div class="topup-sub">Оплата через Telegram Stars</div>
+      <div class="topup-input-wrap">
+        <input type="number" id="topupAmount" min="1" max="100000" placeholder="Сумма">
+        <span class="topup-stars-icon">⭐</span>
+      </div>
+      <div class="topup-presets">
+        <button class="topup-preset" data-amount="100">100 ⭐</button>
+        <button class="topup-preset" data-amount="250">250 ⭐</button>
+        <button class="topup-preset" data-amount="500">500 ⭐</button>
+        <button class="topup-preset" data-amount="1000">1000 ⭐</button>
+        <button class="topup-preset" data-amount="2500">2500 ⭐</button>
+        <button class="topup-preset" data-amount="5000">5000 ⭐</button>
+      </div>
+      <button class="topup-pay-btn" id="topupPayBtn" disabled>Оплатить</button>
+      <button class="topup-close" id="topupClose">Отмена</button>
     </div>
   </div>
 
@@ -1022,10 +1132,47 @@
       setActive(navDragFrom + (Math.abs(dx) < 0.28 ? 0 : Math.round(dx)));
     }, { passive: true });
 
-    // Кнопка пополнения звёздами
+    // Кнопка пополнения звёздами — открывает модалку
     const BOT_USERNAME = 'freezegift_bot';
+    const topupOverlay = document.getElementById('topup-overlay');
+    const topupAmount = document.getElementById('topupAmount');
+    const topupPayBtn = document.getElementById('topupPayBtn');
+
     document.getElementById('topupBtn').addEventListener('click', () => {
-      tg.openTelegramLink('https://t.me/' + BOT_USERNAME + '?start=topup');
+      topupAmount.value = '';
+      topupPayBtn.disabled = true;
+      topupOverlay.classList.add('show');
+    });
+
+    // Ввод суммы — активировать кнопку
+    topupAmount.addEventListener('input', () => {
+      const v = parseInt(topupAmount.value, 10);
+      topupPayBtn.disabled = !v || v < 1;
+    });
+
+    // Пресеты сумм
+    document.querySelectorAll('.topup-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        topupAmount.value = btn.dataset.amount;
+        topupPayBtn.disabled = false;
+      });
+    });
+
+    // Оплата через Telegram Stars
+    topupPayBtn.addEventListener('click', () => {
+      const amount = parseInt(topupAmount.value, 10);
+      if (!amount || amount < 1) return;
+      // Отправляем инвойс через бота
+      tg.openTelegramLink('https://t.me/' + BOT_USERNAME + '?start=topup_' + amount);
+      topupOverlay.classList.remove('show');
+    });
+
+    // Закрыть модалку
+    document.getElementById('topupClose').addEventListener('click', () => {
+      topupOverlay.classList.remove('show');
+    });
+    topupOverlay.addEventListener('click', (e) => {
+      if (e.target === topupOverlay) topupOverlay.classList.remove('show');
     });
 
     // === АРЕНА ===
