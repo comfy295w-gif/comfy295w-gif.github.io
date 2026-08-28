@@ -2046,7 +2046,7 @@
         }, 2);
         if (!data.ok) {
           if(minesStatusEl) minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' <img src="star.png" class="star-icon" alt="⭐">)' : '');
-          if(minesBalanceEl) minesBalanceEl.textContent = data.balance !== undefined ? data.balance : if(minesBalanceEl) minesBalanceEl.textContent;
+          if(minesBalanceEl) minesBalanceEl.textContent = data.balance !== undefined ? data.balance : minesBalanceEl.textContent;
           return;
         }
         if(minesBalanceEl) minesBalanceEl.textContent = data.balance;
