@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NFT РњРёРЅРё-Р°РїРї</title>
+  <title>NFT Мини-апп</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -30,7 +30,7 @@
       overflow-x: hidden;
     }
 
-    /* === Р’РµСЂС…РЅСЏСЏ РїР°РЅРµР»СЊ СЃ Р±Р°Р»Р°РЅСЃРѕРј === */
+    /* === Верхняя панель с балансом === */
     .top-bar {
       padding: 14px 16px 10px;
       display: flex;
@@ -82,7 +82,7 @@
       font-weight: 700;
     }
 
-    /* === РљРѕРЅС‚РµРЅС‚ === */
+    /* === Контент === */
     .main {
       flex: 1;
       display: flex;
@@ -92,7 +92,7 @@
       min-height: 0;
     }
 
-    /* РРіСЂС‹: РєР°СЂС‚РѕС‡РєРё СЂР°СЃС‚СЏРіРёРІР°СЋС‚СЃСЏ РЅР° РІСЃС‘ РѕСЃС‚Р°РІС€РµРµСЃСЏ РјРµСЃС‚Рѕ */
+    /* Игры: карточки растягиваются на всё оставшееся место */
     #games {
       flex: 1;
       display: flex;
@@ -101,7 +101,7 @@
       min-height: 0;
     }
 
-    /* Р’РєР»Р°РґРєРё РРіСЂС‹ / РџРѕРґР°СЂРєРё */
+    /* Вкладки Игры / Подарки */
     .tabs {
       display: flex;
       gap: 8px;
@@ -127,7 +127,7 @@
       box-shadow: 0 6px 20px rgba(124,92,255,0.35);
     }
 
-    /* РљР°СЂС‚РѕС‡РєРё РёРіСЂ (Р¶РёРґРєРѕРµ СЃС‚РµРєР»Рѕ, РєСЂСѓРїРЅС‹Рµ) */
+    /* Карточки игр (жидкое стекло, крупные) */
     .game-card {
       position: relative;
       flex: 1 1 auto;
@@ -166,33 +166,24 @@
     .game-desc { font-size: 13px; color: var(--muted); }
     .game-arrow { color: var(--muted); font-size: 24px; line-height: 1; }
 
-    /* РљР°СЂС‚РѕС‡РєР° РњРёРЅС‹: iframe СЃ Р±Р°РЅРЅРµСЂРѕРј РёР· miny_card.html */
+    /* Карточка Мины */
     .game-card-mines {
       position: relative;
       overflow: hidden;
-      min-height: 230px;
-      padding: 0;
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.12);
     }
-    .game-card-mines .mines-card-frame {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: transparent;
-      pointer-events: auto;
+    .game-card-mines .game-icon {
+      background: url('mines_card.png') center/cover no-repeat;
+      border-radius: 20px;
     }
 
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
     .icon-arena     { background: linear-gradient(135deg,#a18cd1,#fbc2eb); }
     .icon-contest   { background: linear-gradient(135deg,#f7971e,#ffd200); }
 
-    /* РћС‚СЃС‚СѓРї РІРЅРёР·Сѓ РґР»СЏ РїР°РЅРµР»Рё */
+    /* Отступ внизу для панели */
     .spacer { height: 20px; }
 
-    /* === Р­РєСЂР°РЅ РђСЂРµРЅС‹ === */
+    /* === Экран Арены === */
     #arenaScreen { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
     .arena-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -272,7 +263,7 @@
       color: #fff; font-size: 17px; font-weight: 700; cursor: pointer;
     }
 
-    /* === РљРѕР»РµСЃРѕ С„РѕСЂС‚СѓРЅС‹ (РєСЂСѓРіР»РѕРµ) === */
+    /* === Колесо фортуны (круглое) === */
     .arena-wheel-wrap { text-align: center; margin-bottom: 16px; position: relative; padding-top: 4px; }
     .wheel-needle {
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
@@ -311,7 +302,7 @@
       border: 1px solid rgba(255,215,0,0.4); font-weight: 700; font-size: 16px;
     }
 
-    /* === РРіСЂР° РњРёРЅС‹ === */
+    /* === Игра Мины === */
     #minesScreen { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
     .mines-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -362,7 +353,7 @@
     #minesStartWrap { text-align: center; margin-top: 12px; }
     #minesStart { max-width: 260px; }
 
-    /* РњРЅРѕР¶РёС‚РµР»СЊ + Р—Р°Р±СЂР°С‚СЊ */
+    /* Множитель + Забрать */
     .mines-info {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 14px 16px; margin-bottom: 14px;
@@ -387,7 +378,7 @@
     .mines-cash-btn:active { transform: scale(0.96); }
     .mines-cash-btn:disabled { opacity: 0.45; }
 
-    /* РџРѕР»Рµ 5x5 */
+    /* Поле 5x5 */
     .mines-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -396,7 +387,7 @@
       margin: 0 auto;
     }
     .mines-grid.ended .mines-cell { pointer-events: none; }
-    /* РџРѕР»Рµ РІРёРґРЅРѕ РІСЃРµРіРґР°, РЅРѕ РїРѕРєР° РЅРµ РёРіСЂР°РµС€СЊ - РїСЂРёР·СЂР°С‡РЅРѕРµ */
+    /* Поле видно всегда, но пока не играешь - призрачное */
     #minesScreen.idle .mines-cell { pointer-events: none; opacity: 0.5; }
     .mines-cell {
       aspect-ratio: 1 / 1;
@@ -434,7 +425,7 @@
       box-shadow: 0 6px 18px rgba(124,92,255,0.35);
     }
 
-    /* === Р›РµРґСЏРЅР°СЏ РєР°СЂС‚РѕС‡РєР°-Р±Р°РЅРЅРµСЂ РњРёРЅС‹ === */
+    /* === Ледяная карточка-баннер Мины === */
     .mines-hero {
       position: relative;
       width: 100%;
@@ -450,7 +441,7 @@
       border-radius: 26px;
     }
 
-    /* РСЃС‚РѕСЂРёСЏ РјР°С‚С‡РµР№ */
+    /* История матчей */
     .mines-hist-item {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
       padding: 10px 14px; margin-bottom: 8px;
@@ -480,7 +471,7 @@
     .mines-hist-item .mh-ava img { width: 100%; height: 100%; object-fit: cover; }
     .mines-hist-item .mh-x { font-weight: 800; color: #ffd447; white-space: nowrap; }
 
-    /* === РќРёР¶РЅСЏСЏ РїР°РЅРµР»СЊ РЅР°РІРёРіР°С†РёРё (Р¶РёРґРєРѕРµ СЃС‚РµРєР»Рѕ) === */
+    /* === Нижняя панель навигации (жидкое стекло) === */
     .bottom-nav {
       position: fixed;
       left: 14px;
@@ -509,7 +500,7 @@
       -webkit-user-select: none;
       user-select: none;
     }
-    /* Р–РёРІРѕР№ Р±Р»РёРє, СЃРєРѕР»СЊР·СЏС‰РёР№ РїРѕ СЃС‚РµРєР»Сѓ */
+    /* Живой блик, скользящий по стеклу */
     .bottom-nav::after {
       content: '';
       position: absolute;
@@ -529,7 +520,7 @@
       85%   { transform: skewX(-20deg) translateX(260%); }
       100%  { transform: skewX(-20deg) translateX(260%); }
     }
-    /* Р–РёРґРєРёР№ РёРЅРґРёРєР°С‚РѕСЂ-В«РєР°РїР»СЏВ» (РїСЂРѕР·СЂР°С‡РЅС‹Р№ РєСЂСѓР¶РѕРє/РєР°РїСЃСѓР»Р° Р°РєС‚РёРІРЅРѕРіРѕ СЂР°Р·РґРµР»Р°) */
+    /* Жидкий индикатор-«капля» (прозрачный кружок/капсула активного раздела) */
     .nav-indicator {
       position: absolute;
       top: 7px;
@@ -588,21 +579,21 @@
   </style>
 </head>
 <body>
-  <!-- Р’РµСЂС…: Р±Р°Р»Р°РЅСЃ + Р°РІР°С‚Р°СЂ -->
+  <!-- Верх: баланс + аватар -->
   <div class="top-bar">
-    <button class="balance" id="topupBtn"><span class="stars-icon">в­ђ</span> <span id="balanceValue">0</span> <span class="plus">+</span></button>
-    <div class="profile-mini">рџЋ</div>
+    <button class="balance" id="topupBtn"><span class="stars-icon">⭐</span> <span id="balanceValue">0</span> <span class="plus">+</span></button>
+    <div class="profile-mini">😎</div>
   </div>
 
-  <!-- РљРѕРЅС‚РµРЅС‚ -->
+  <!-- Контент -->
   <div class="main">
-    <!-- Р’РєР»Р°РґРєРё -->
+    <!-- Вкладки -->
     <div class="tabs">
-      <div class="tab active" data-tab="games">РРіСЂС‹</div>
-      <div class="tab" data-tab="gifts">РџРѕРґР°СЂРєРё</div>
+      <div class="tab active" data-tab="games">Игры</div>
+      <div class="tab" data-tab="gifts">Подарки</div>
     </div>
 
-    <!-- РРіСЂС‹ -->
+    <!-- Игры -->
     <div id="games" class="tab-content">
       <div class="game-card">
         <div class="game-icon icon-upgrade">
@@ -613,16 +604,19 @@
           </svg>
         </div>
         <div class="game-info">
-          <div class="game-name">РђРїРіСЂРµР№Рґ</div>
-          <div class="game-desc">РџСЂРѕРєР°С‡Р°Р№ РїСЂРѕС„РёР»СЊ Рё Р·РІР°РЅРёСЏ</div>
+          <div class="game-name">Апгрейд</div>
+          <div class="game-desc">Прокачай профиль и звания</div>
         </div>
-        <div class="game-arrow">вЂє</div>
+        <div class="game-arrow">›</div>
       </div>
 
       <div class="game-card game-card-mines" data-open="mines">
-        <iframe class="mines-card-frame" src="miny_card.html"
-          title="РњРёРЅС‹" frameborder="0" scrolling="no"
-          allowtransparency="true"></iframe>
+        <div class="game-icon" style="background: url('mines_card.png') center/cover no-repeat;"></div>
+        <div class="game-info">
+          <div class="game-name">Мины</div>
+          <div class="game-desc">Открывай ячейки и избегай мин</div>
+        </div>
+        <div class="game-arrow">›</div>
       </div>
 
       <div class="game-card" data-open="arena">
@@ -635,10 +629,10 @@
           </svg>
         </div>
         <div class="game-info">
-          <div class="game-name">РђСЂРµРЅР° (PvP)</div>
-          <div class="game-desc">РЎС‚Р°РІСЊ Р·РІС‘Р·РґС‹ Рё Р·Р°Р±РµСЂРё РІРµСЃСЊ Р±Р°РЅРє</div>
+          <div class="game-name">Арена (PvP)</div>
+          <div class="game-desc">Ставь звёзды и забери весь банк</div>
         </div>
-        <div class="game-arrow">вЂє</div>
+        <div class="game-arrow">›</div>
       </div>
 
       <div class="game-card">
@@ -652,40 +646,40 @@
           </svg>
         </div>
         <div class="game-info">
-          <div class="game-name">РљРѕРЅРєСѓСЂСЃС‹</div>
-          <div class="game-desc">Р’С‹РёРіСЂС‹РІР°Р№ NFT Рё Р·РІС‘Р·РґС‹</div>
+          <div class="game-name">Конкурсы</div>
+          <div class="game-desc">Выигрывай NFT и звёзды</div>
         </div>
-        <div class="game-arrow">вЂє</div>
+        <div class="game-arrow">›</div>
       </div>
       <div class="spacer"></div>
     </div>
 
-    <!-- РџРѕРґР°СЂРєРё (Р·Р°РіР»СѓС€РєР°) -->
+    <!-- Подарки (заглушка) -->
     <div id="gifts" class="tab-content" style="display:none;">
       <div style="text-align:center; color:var(--muted); padding:40px 0;">
-        рџЋЃ Р—РґРµСЃСЊ Р±СѓРґСѓС‚ РїРѕРґР°СЂРєРё
+        🎁 Здесь будут подарки
       </div>
     </div>
   </div>
 
-  <!-- Р­РєСЂР°РЅ РёРіСЂС‹ РњРёРЅС‹ -->
+  <!-- Экран игры Мины -->
   <div id="minesScreen" style="display:none;">
     <div class="mines-header">
-      <button class="back-btn" id="minesBack">вЂ№</button>
-      <h2>рџ’Ј РњРёРЅС‹</h2>
+      <button class="back-btn" id="minesBack">‹</button>
+      <h2>💣 Мины</h2>
       <div></div>
     </div>
     <div class="mines-body">
-      <!-- Р›РµРґСЏРЅР°СЏ РєР°СЂС‚РѕС‡РєР°-Р±Р°РЅРЅРµСЂ -->
+      <!-- Ледяная карточка-баннер -->
       <div class="mines-hero" id="minesHeroPlay">
-        <img src="mines_card.png" alt="РњРёРЅС‹">
+        <img src="mines_card.png" alt="Мины">
       </div>
 
-      <div class="mines-balance">в­ђ Р‘Р°Р»Р°РЅСЃ: <span id="minesBalance">0</span></div>
+      <div class="mines-balance">⭐ Баланс: <span id="minesBalance">0</span></div>
 
       <div class="mines-panel" id="minesSetupPanel">
         <div class="mines-row">
-          <span class="mines-label">РњРёРЅ РЅР° РїРѕР»Рµ</span>
+          <span class="mines-label">Мин на поле</span>
           <div class="mines-chips" id="mineCountChips">
             <button class="mines-chip selected" data-mines="3">3</button>
             <button class="mines-chip" data-mines="5">5</button>
@@ -694,7 +688,7 @@
           </div>
         </div>
         <div class="mines-row">
-          <span class="mines-label">РЎС‚Р°РІРєР° в­ђ</span>
+          <span class="mines-label">Ставка ⭐</span>
           <div class="mines-chips" id="minesBetChips">
             <button class="mines-chip selected" data-bet="100">100</button>
             <button class="mines-chip" data-bet="250">250</button>
@@ -702,28 +696,28 @@
             <button class="mines-chip" data-bet="1000">1000</button>
           </div>
         </div>
-        <input class="mines-custom" id="minesCustomBet" inputmode="numeric" type="number" min="5" placeholder="РЎРІРѕСЏ СЃСѓРјРјР° (РѕС‚ 5 в­ђ)">
+        <input class="mines-custom" id="minesCustomBet" inputmode="numeric" type="number" min="5" placeholder="Своя сумма (от 5 ⭐)">
         <div id="minesStartWrap">
-          <button class="arena-play-btn" id="minesStart">рџЋЇ Р’ РёРіСЂСѓ</button>
+          <button class="arena-play-btn" id="minesStart">🎯 В игру</button>
         </div>
       </div>
 
       <div class="mines-info">
         <div>
-          <div class="mines-mult"><small>РњРЅРѕР¶РёС‚РµР»СЊ</small><span id="minesMult">1.00</span>x</div>
-          <div class="mines-expected">Р—Р°Р±РµСЂС‘С€СЊ: <span id="minesPayout">0</span> в­ђ</div>
+          <div class="mines-mult"><small>Множитель</small><span id="minesMult">1.00</span>x</div>
+          <div class="mines-expected">Заберёшь: <span id="minesPayout">0</span> ⭐</div>
         </div>
-        <button class="mines-cash-btn" id="minesCashout" disabled>рџ’Ћ Р—Р°Р±СЂР°С‚СЊ</button>
+        <button class="mines-cash-btn" id="minesCashout" disabled>💎 Забрать</button>
       </div>
       <div class="mines-grid" id="minesGrid"></div>
-      <div class="mines-status" id="minesStatus">РЎРґРµР»Р°Р№ СЃС‚Р°РІРєСѓ, С‡С‚РѕР±С‹ РЅР°С‡Р°С‚СЊ СЂР°СѓРЅРґ</div>
+      <div class="mines-status" id="minesStatus">Сделай ставку, чтобы начать раунд</div>
       <div style="text-align:center; margin-top:14px;">
-        <button class="mines-new-btn" id="minesAgain" style="display:none;">рџ”„ РќРѕРІР°СЏ РёРіСЂР°</button>
+        <button class="mines-new-btn" id="minesAgain" style="display:none;">🔄 Новая игра</button>
       </div>
       <div style="margin-top:12px;">
         <div style="display:flex; gap:8px;">
-          <button class="mines-tab" id="minesTabHistory">рџ“њ РСЃС‚РѕСЂРёСЏ</button>
-          <button class="mines-tab" id="minesTabLeader">рџЏ† РўРѕРї РёРєСЃС‹</button>
+          <button class="mines-tab" id="minesTabHistory">📜 История</button>
+          <button class="mines-tab" id="minesTabLeader">🏆 Топ иксы</button>
         </div>
         <div id="minesWrapMsg" style="display:none; margin-top:10px;"></div>
         <div id="minesHistoryWrap" style="display:none; margin-top:10px;"></div>
@@ -731,79 +725,79 @@
     </div>
   </div>
 
-  <!-- Р­РєСЂР°РЅ РђСЂРµРЅС‹ -->
+  <!-- Экран Арены -->
   <div id="arenaScreen" style="display:none;">
     <div class="arena-header">
-      <button class="back-btn" id="arenaBack">вЂ№</button>
-      <h2>вљ”пёЏ РђСЂРµРЅР°</h2>
+      <button class="back-btn" id="arenaBack">‹</button>
+      <h2>⚔️ Арена</h2>
       <div></div>
     </div>
     <div class="arena-body">
       <div class="arena-bank-card">
-        <div class="arena-bank-label">РћР±С‰РёР№ Р±Р°РЅРє</div>
-        <div class="arena-bank-amount"><span id="arenaBank">0</span> в­ђ</div>
-        <div class="arena-bank-sub">РЈС‡Р°СЃС‚РЅРёРєРѕРІ: <span id="arenaPlayers">0</span></div>
+        <div class="arena-bank-label">Общий банк</div>
+        <div class="arena-bank-amount"><span id="arenaBank">0</span> ⭐</div>
+        <div class="arena-bank-sub">Участников: <span id="arenaPlayers">0</span></div>
       </div>
 
-      <!-- Р СѓР»РµС‚РєР° С„РѕСЂС‚СѓРЅС‹ -->
+      <!-- Рулетка фортуны -->
       <div class="arena-wheel-wrap" id="arenaWheelWrap">
         <div class="wheel-needle"></div>
         <div class="arena-wheel" id="arenaWheel">
           <svg viewBox="0 0 200 200">
 <circle cx="100" cy="100" r="98" fill="#000000"/>
-            <text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15">Р–РґС‘Рј СѓС‡Р°СЃС‚РЅРёРєРѕРІ...</text>
+            <text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15">Ждём участников...</text>
           </svg>
         </div>
-        <div class="wheel-btn" id="wheelSpinLabel">рџЋ° РљСЂСѓС‚РёС‚СЃСЏ...</div>
+        <div class="wheel-btn" id="wheelSpinLabel">🎰 Крутится...</div>
       </div>
       <div id="wheelResult" class="wheel-result" style="display:none;"></div>
 
       <div class="arena-players">
-        <div class="arena-players-title">РЈС‡Р°СЃС‚РЅРёРєРё</div>
-        <div id="arenaPlayersList" style="color:var(--muted);font-size:14px;">РџРѕРєР° РЅРёРєС‚Рѕ РЅРµ РїРѕСЃС‚Р°РІРёР»</div>
+        <div class="arena-players-title">Участники</div>
+        <div id="arenaPlayersList" style="color:var(--muted);font-size:14px;">Пока никто не поставил</div>
       </div>
 
-      <div class="arena-bet-title">РЎРґРµР»Р°С‚СЊ СЃС‚Р°РІРєСѓ</div>
+      <div class="arena-bet-title">Сделать ставку</div>
       <div class="arena-bet-options">
         <button class="bet-btn" data-bet="100">100</button>
         <button class="bet-btn" data-bet="250">250</button>
         <button class="bet-btn" data-bet="500">500</button>
         <button class="bet-btn" data-bet="1000">1000</button>
         <div class="bet-custom">
-          <input type="number" id="customBet" min="50" max="100000" placeholder="РЎРІРѕСЏ СЃСѓРјРјР° (РѕС‚ 50 РґРѕ 100000) в­ђ">
+          <input type="number" id="customBet" min="50" max="100000" placeholder="Своя сумма (от 50 до 100000) ⭐">
         </div>
       </div>
-      <button class="arena-play-btn" id="arenaPlaceBet">рџЋЇ Р’ РёРіСЂСѓ</button>
+      <button class="arena-play-btn" id="arenaPlaceBet">🎯 В игру</button>
       <div id="arenaStatus" style="text-align:center;color:var(--muted);font-size:13px;margin-top:12px;"></div>
     </div>
   </div>
 
-  <!-- РќРёР¶РЅСЏСЏ РїР°РЅРµР»СЊ (Р¶РёРґРєРѕРµ СЃС‚РµРєР»Рѕ) -->
+  <!-- Нижняя панель (жидкое стекло) -->
   <nav class="bottom-nav" id="bottomNav">
     <div class="nav-indicator" id="navIndicator"></div>
     <button class="nav-item active" data-section="home">
       <span class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.8 12 3l9 7.8"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
       </span>
-      <span class="label">Р“Р»Р°РІРЅР°СЏ</span>
+      <span class="label">Главная</span>
     </button>
     <button class="nav-item" data-section="tasks">
       <span class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3"/><path d="M9 2h6v4H9z"/><path d="m9 13 2 2 4-4"/></svg>
       </span>
-      <span class="label">Р—Р°РґР°РЅРёСЏ</span>
+      <span class="label">Задания</span>
     </button>
     <button class="nav-item" data-section="games">
       <span class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6.5" width="20" height="11" rx="5.5"/><line x1="6.5" y1="10.5" x2="6.5" y2="14.5"/><line x1="4.5" y1="12.5" x2="8.5" y2="12.5"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="14.5" x2="18.01" y2="14.5"/></svg>
       </span>
-      <span class="label">РРіСЂС‹</span>
+      <span class="label">Игры</span>
     </button>
     <button class="nav-item" data-section="profile">
       <span class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c0-3.6 3.4-5.5 7.5-5.5s7.5 1.9 7.5 5.5"/></svg>
       </span>
-      <span class="label">РџСЂРѕС„РёР»СЊ</span>
+      <span class="label">Профиль</span>
     </button>
   </nav>
 
@@ -812,18 +806,18 @@
     tg.ready();
     tg.expand();
 
-    // Р‘РµСЂС‘Рј Р±Р°Р»Р°РЅСЃ РёР· URL (?balance=...), РєРѕС‚РѕСЂС‹Р№ РїРµСЂРµРґР°Р» Р±РѕС‚
+    // Берём баланс из URL (?balance=...), который передал бот
     const params = new URLSearchParams(window.location.search);
     const balanceCount = parseInt(params.get('balance') || '0', 10);
     document.getElementById('balanceValue').textContent = isNaN(balanceCount) ? 0 : balanceCount;
 
-    // РџРѕРєР°Р·С‹РІР°РµРј РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ РїСЂРѕС„РёР»Рµ (СѓРіРѕР»РѕРє)
+    // Показываем имя пользователя в профиле (уголок)
     try {
-      const firstName = tg.initDataUnsafe.user.first_name || 'РРіСЂРѕРє';
-      document.querySelector('.profile-mini').textContent = (firstName[0] || 'Р').toUpperCase();
+      const firstName = tg.initDataUnsafe.user.first_name || 'Игрок';
+      document.querySelector('.profile-mini').textContent = (firstName[0] || 'И').toUpperCase();
     } catch (e) {}
 
-    // РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РІРєР»Р°РґРѕРє РРіСЂС‹ / РџРѕРґР°СЂРєРё
+    // Переключение вкладок Игры / Подарки
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -835,7 +829,7 @@
       });
     });
 
-    // РќРёР¶РЅСЏСЏ РїР°РЅРµР»СЊ: Р¶РёРґРєРёР№ РёРЅРґРёРєР°С‚РѕСЂ-В«РєР°РїР»СЏВ» + СЃРІР°Р№Рї РјРµР¶РґСѓ СЂР°Р·РґРµР»Р°РјРё
+    // Нижняя панель: жидкий индикатор-«капля» + свайп между разделами
     const navItems = document.querySelectorAll('.nav-item');
     const bottomNav = document.getElementById('bottomNav');
     const navIndicator = document.getElementById('navIndicator');
@@ -860,7 +854,7 @@
       item.addEventListener('click', () => setActive(i));
     });
 
-    // РЎРІР°Р№Рї: В«РєР°РїР»СЏВ» СЃРєРѕР»СЊР·РёС‚ Р·Р° РїР°Р»СЊС†РµРј, РЅР° РѕС‚РїСѓСЃРєР°РЅРёРё РґРѕР»РёРІР°РµС‚ РґРѕ Р±Р»РёР¶Р°Р№С€РµРіРѕ СЂР°Р·РґРµР»Р°
+    // Свайп: «капля» скользит за пальцем, на отпускании доливает до ближайшего раздела
     let navDragX = null;
     let navDragFrom = 0;
     bottomNav.addEventListener('touchstart', (e) => {
@@ -881,21 +875,21 @@
       setActive(navDragFrom + (Math.abs(dx) < 0.28 ? 0 : Math.round(dx)));
     }, { passive: true });
 
-    // РљРЅРѕРїРєР° РїРѕРїРѕР»РЅРµРЅРёСЏ Р·РІС‘Р·РґР°РјРё
+    // Кнопка пополнения звёздами
     const BOT_USERNAME = 'freezegift_bot';
     document.getElementById('topupBtn').addEventListener('click', () => {
       tg.openTelegramLink('https://t.me/' + BOT_USERNAME + '?start=topup');
     });
 
-    // === РђР Р•РќРђ ===
-    // РђРґСЂРµСЃ СЃРµСЂРІРµСЂР° Р±РѕС‚Р° (С‡РµСЂРµР· ngrok С‚СѓРЅРЅРµР»СЊ)
+    // === АРЕНА ===
+    // Адрес сервера бота (через ngrok туннель)
     const ARENA_API = 'https://linguist-cloud-manned.ngrok-free.dev/api/arena';
     const ARENA_BASE = ARENA_API.replace(/\/arena$/, '');
     function avatarUrl(userId) { return ARENA_BASE + '/avatar/' + userId; }
 
-    // ngrok РѕС‚РґР°С‘С‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ РІРјРµСЃС‚Рѕ РєР°СЂС‚РёРЅРєРё, РµСЃР»Рё РІ Р·Р°РїСЂРѕСЃРµ РЅРµС‚ Р·Р°РіРѕР»РѕРІРєР°
-    // ngrok-skip-browser-warning. РћР±С‹С‡РЅС‹Р№ <img> РµРіРѕ РЅРµ С€Р»С‘С‚, РїРѕСЌС‚РѕРјСѓ РіСЂСѓР·РёРј Р°РІР°С‚Р°СЂ
-    // С‡РµСЂРµР· fetch СЃ Р·Р°РіРѕР»РѕРІРєРѕРј Рё РІСЃС‚Р°РІР»СЏРµРј РєР°Рє data-URL.
+    // ngrok отдаёт предупреждение вместо картинки, если в запросе нет заголовка
+    // ngrok-skip-browser-warning. Обычный <img> его не шлёт, поэтому грузим аватар
+    // через fetch с заголовком и вставляем как data-URL.
     const avatarCache = {};
     function avatarDataURL(userId) {
       return new Promise((resolve) => {
@@ -936,15 +930,15 @@
     let arenaRefreshTimer = null;
     let myUserId = USER_ID;
 
-    // РџРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ Telegram РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+    // Получаем данные Telegram пользователя
     function getNick() {
       try {
         const u = tg.initDataUnsafe.user;
-        return u.first_name || 'РРіСЂРѕРє';
-      } catch (e) { return 'РРіСЂРѕРє'; }
+        return u.first_name || 'Игрок';
+      } catch (e) { return 'Игрок'; }
     }
 
-    // РћС‚РєСЂС‹С‚СЊ СЌРєСЂР°РЅ Р°СЂРµРЅС‹ (РїСЂР°РІРёР»СЊРЅРѕ вЂ” РїРµСЂРµРєР»СЋС‡Р°РµРј, СЃРѕС…СЂР°РЅСЏСЏ nav.html)
+    // Открыть экран арены (правильно — переключаем, сохраняя nav.html)
     function openArenaScreen() {
       document.querySelector('.main').style.display = 'none';
       document.querySelector('.bottom-nav').style.display = 'none';
@@ -961,7 +955,7 @@
       if (arenaRefreshTimer) { clearInterval(arenaRefreshTimer); arenaRefreshTimer = null; }
     }
 
-    // Р—Р°РїСЂРѕСЃ СЃРѕСЃС‚РѕСЏРЅРёСЏ Р°СЂРµРЅС‹
+    // Запрос состояния арены
     async function refreshArena() {
       try {
         const res = await fetch(ARENA_API, {
@@ -974,19 +968,19 @@
         const entries = data.roundEntries || data.entries || [];
         if (entries.length > 0) {
           listEl.innerHTML = entries.map((e) => {
-            const nm = e.name || e.username || 'РРіСЂРѕРє';
+            const nm = e.name || e.username || 'Игрок';
             const initial = (nm.trim().charAt(0) || '?').toUpperCase();
             return '<div class="arena-player">' +
               '<div class="arena-player-avatar"><span class="a-initial">' + initial + '</span>' +
                 '<img data-uid="' + e.userId + '" src="" alt="" onerror="this.remove()">' +
               '</div>' +
               '<span class="arena-player-name">' + nm + '</span>' +
-              '<span class="arena-player-bet">' + e.bet + ' в­ђ</span>' +
+              '<span class="arena-player-bet">' + e.bet + ' ⭐</span>' +
             '</div>';
           }).join('');
           fillAvatarImages(listEl, 'src');
         } else {
-          listEl.innerHTML = 'РџРѕРєР° РЅРёРєС‚Рѕ РЅРµ РїРѕСЃС‚Р°РІРёР»';
+          listEl.innerHTML = 'Пока никто не поставил';
         }
 
         renderWheel(data);
@@ -996,35 +990,35 @@
       }
     }
 
-    // === РљРѕР»РµСЃРѕ С„РѕСЂС‚СѓРЅС‹ (РєСЂСѓРіР»РѕРµ) ===
-    // Р¦РІРµС‚Р° СЃРµРєС‚РѕСЂРѕРІ СЂСѓР»РµС‚РєРё
+    // === Колесо фортуны (круглое) ===
+    // Цвета секторов рулетки
     const WHEEL_COLORS = ['#ff6b6b', '#38ef7d', '#7c5cff', '#ffd700', '#00d4ff', '#ff8e53', '#a18cd1', '#f38efd'];
 
-    // РџР°СЂР°РјРµС‚СЂС‹ РєРѕР»РµСЃР° РІ SVG (viewBox 200x200)
+    // Параметры колеса в SVG (viewBox 200x200)
     const WHEEL_CX = 100, WHEEL_CY = 100, WHEEL_R = 98, WHEEL_INNER = 46, WHEEL_AVR = 74, AVATAR_R = 20;
 
-    let wheelAngle = 0;       // С‚РµРєСѓС‰РёР№ СѓРіРѕР» РїРѕРІРѕСЂРѕС‚Р° РєРѕР»РµСЃР° (РіСЂР°РґСѓСЃС‹)
-    let wheelTicker = null;   // rAF-С†РёРєР» РЅРµРїСЂРµСЂС‹РІРЅРѕРіРѕ РІСЂР°С‰РµРЅРёСЏ
-    let spinningFlag = false; // РёРґС‘С‚ Р»Рё РЅРµРїСЂРµСЂС‹РІРЅРѕРµ РІСЂР°С‰РµРЅРёРµ
-    let landingLock = null;   // { winnerUserId, target } РЅР° РєРѕРіРѕ СѓР¶Рµ РїСЂРёР·РµРјР»СЏРµРјСЃСЏ
-    let lastWheelKey = '';    // РїСЂРёР·РЅР°Рє, С‡С‚Рѕ СЃРѕСЃС‚Р°РІ СѓС‡Р°СЃС‚РЅРёРєРѕРІ РЅРµ РјРµРЅСЏР»СЃСЏ
-    let sliceCount = 0;       // СЃРєРѕР»СЊРєРѕ СЃРµРєС‚РѕСЂРѕРІ РЅР° РєРѕР»РµСЃРµ
-    let sliceMids = [];       // СЃРµСЂРµРґРёРЅС‹ СЃРµРєС‚РѕСЂРѕРІ (РґР»СЏ РїСЂРёР·РµРјР»РµРЅРёСЏ РЅР° РїРѕР±РµРґРёС‚РµР»СЏ)
-    let sliceMeta = [];       // РіСЂР°РЅРёС†С‹ СЃРµРєС‚РѕСЂРѕРІ { start, end, mid } РґР»СЏ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ РїСЂРёР·РµРјР»РµРЅРёСЏ
+    let wheelAngle = 0;       // текущий угол поворота колеса (градусы)
+    let wheelTicker = null;   // rAF-цикл непрерывного вращения
+    let spinningFlag = false; // идёт ли непрерывное вращение
+    let landingLock = null;   // { winnerUserId, target } на кого уже приземляемся
+    let lastWheelKey = '';    // признак, что состав участников не менялся
+    let sliceCount = 0;       // сколько секторов на колесе
+    let sliceMids = [];       // середины секторов (для приземления на победителя)
+    let sliceMeta = [];       // границы секторов { start, end, mid } для случайного приземления
 
-    // РўРѕС‡РєР° РЅР° РѕРєСЂСѓР¶РЅРѕСЃС‚Рё (СѓРіРѕР» РІ РіСЂР°РґСѓСЃР°С…, 0 = РїСЂР°РІРѕ, РґР°Р»СЊС€Рµ РїРѕ С‡Р°СЃРѕРІРѕР№)
+    // Точка на окружности (угол в градусах, 0 = право, дальше по часовой)
     function wheelPoint(deg, r) {
       const a = (deg * Math.PI) / 180;
       return { x: WHEEL_CX + r * Math.cos(a), y: WHEEL_CY + r * Math.sin(a) };
     }
 
-    // РљСЂСѓРіРѕРІРѕРµ РєРѕР»РµСЃРѕ: СЂР°Р·РјРµСЂ СЃРµРєС‚РѕСЂР° РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»РµРЅ СЃС‚Р°РІРєРµ, РЅР° СЃРµРєС‚РѕСЂРµ Р°РІР°С‚Р°СЂРєР° РёРіСЂРѕРєР°
+    // Круговое колесо: размер сектора пропорционален ставке, на секторе аватарка игрока
     function buildWheelHtml(players) {
       if (players.length === 0) {
         return '<svg viewBox="0 0 200 200">' +
           '<circle cx="100" cy="100" r="98" fill="#000000"/>' +
           '<circle cx="100" cy="100" r="98" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
-          '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15" font-family="inherit">Р–РґС‘Рј СѓС‡Р°СЃС‚РЅРёРєРѕРІ...</text>' +
+          '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15" font-family="inherit">Ждём участников...</text>' +
         '</svg>';
       }
       const n = players.length;
@@ -1035,7 +1029,7 @@
       let s0 = 0;
       players.forEach((p, i) => {
         const frac = totalBet > 0 ? (Number(p.bet) || 0) / totalBet : 1 / n;
-        let s1 = (i === n - 1) ? 360 : Math.min(360 - 0.001, s0 + 360 * frac); // РїРѕСЃР»РµРґРЅРёР№ Р·Р°РєСЂС‹РІР°РµС‚ РєСЂСѓРі
+        let s1 = (i === n - 1) ? 360 : Math.min(360 - 0.001, s0 + 360 * frac); // последний закрывает круг
         const span = Math.max(0.5, s1 - s0);
         const cm = s0 + span / 2;
         mids.push(cm);
@@ -1046,7 +1040,7 @@
           ' A' + WHEEL_R + ' ' + WHEEL_R + ' 0 ' + large + ' 1 ' + p1.x + ' ' + p1.y + ' Z" ' +
           'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(0,0,0,0.85)" stroke-width="3" data-idx="' + i + '"/>';
         const av = wheelPoint(cm, WHEEL_AVR);
-        const initial = (((p.name || p.username || 'РРіСЂРѕРє').trim().charAt(0)) || '?').toUpperCase();
+        const initial = (((p.name || p.username || 'Игрок').trim().charAt(0)) || '?').toUpperCase();
         avatars +=
           '<g class="wheel-avatar" data-idx="' + i + '">' +
             '<clipPath id="wclip' + i + '"><circle cx="' + av.x.toFixed(2) + '" cy="' + av.y.toFixed(2) + '" r="' + AVATAR_R + '"/></clipPath>' +
@@ -1061,7 +1055,7 @@
       return '<svg viewBox="0 0 200 200">' +
         '<g id="wheelGroup">' + slices + avatars + '</g>' +
         '<circle cx="100" cy="100" r="46" fill="#000000" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
-        '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="22">рџЋ°</text>' +
+        '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="22">🎰</text>' +
       '</svg>';
     }
 
@@ -1070,7 +1064,7 @@
       if (g) g.setAttribute('transform', 'rotate(' + wheelAngle + ' 100 100)');
     }
 
-    // РћС‚СЂРёСЃРѕРІРєР° РєРѕР»РµСЃР° (РїРµСЂРµСЃС‚СЂР°РёРІР°РµРј С‚РѕР»СЊРєРѕ РµСЃР»Рё РёР·РјРµРЅРёР»СЃСЏ СЃРѕСЃС‚Р°РІ СѓС‡Р°СЃС‚РЅРёРєРѕРІ)
+    // Отрисовка колеса (перестраиваем только если изменился состав участников)
     function renderWheel(data) {
       const wheel = document.getElementById('arenaWheel');
       const players = (data.roundEntries || data.entries || []).slice(0, 8);
@@ -1088,7 +1082,7 @@
       }
     }
 
-    // РќРµРїСЂРµСЂС‹РІРЅРѕРµ РІСЂР°С‰РµРЅРёРµ
+    // Непрерывное вращение
     function startSpin() {
       if (spinningFlag || sliceCount === 0) return;
       spinningFlag = true;
@@ -1110,7 +1104,7 @@
       if (wheelTicker) { cancelAnimationFrame(wheelTicker); wheelTicker = null; }
     }
 
-    // РЈР±РёСЂР°РµРј РїРѕРґСЃРІРµС‚РєСѓ РїРѕР±РµРґРёС‚РµР»СЏ Рё Р·Р°РјРѕРє РїСЂРёР·РµРјР»РµРЅРёСЏ
+    // Убираем подсветку победителя и замок приземления
     function clearWinnerHighlight() {
       const wheel = document.getElementById('arenaWheel');
       const segs = wheel.querySelectorAll('.wheel-seg.winner, path.winner, .wheel-avatar.winner');
@@ -1118,15 +1112,15 @@
       landingLock = null;
     }
 
-    // РџР»Р°РІРЅРѕ РїСЂРёР·РµРјР»СЏРµРј РєРѕР»РµСЃРѕ: СЃРµРєС‚РѕСЂ РїРѕР±РµРґРёС‚РµР»СЏ РѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ РїРѕРґ СЃС‚СЂРµР»РєРѕР№ (РЅР°РІРµСЂС…Сѓ)
+    // Плавно приземляем колесо: сектор победителя останавливается под стрелкой (наверху)
     function landOnWinner(data) {
       stopSpin();
       if (sliceCount === 0) return;
-      if (landingLock && landingLock.winnerUserId === data.winner.userId) return; // СѓР¶Рµ РїСЂРёР·РµРјР»СЏРµРјСЃСЏ
+      if (landingLock && landingLock.winnerUserId === data.winner.userId) return; // уже приземляемся
       const roundEntries = (data.roundEntries || data.entries || []).slice(0, 8);
       const idx = roundEntries.findIndex((e) => e.userId === data.winner.userId);
       if (idx < 0) { resetWheel(); return; }
-      // РЎР»СѓС‡Р°Р№РЅР°СЏ С‚РѕС‡РєР° РІРЅСѓС‚СЂРё СЃРµРєС‚РѕСЂР° РїРѕР±РµРґРёС‚РµР»СЏ: СЃС‚СЂРµР»РєР° РѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ РЅРµ СЂРѕРІРЅРѕ РЅР° РїСЂРѕС„РёР»Рµ
+      // Случайная точка внутри сектора победителя: стрелка останавливается не ровно на профиле
       const m = sliceMeta[idx];
       const ci = m
         ? m.start + Math.random() * (m.end - m.start)
@@ -1134,12 +1128,12 @@
             ? sliceMids[idx]
             : (idx + 0.5) * (360 / sliceCount));
       const base = ((270 - ci) % 360 + 360) % 360;
-      // РџР»СЋСЃ РЅРµСЃРєРѕР»СЊРєРѕ РїРѕР»РЅС‹С… РѕР±РѕСЂРѕС‚РѕРІ, С‡С‚РѕР±С‹ РєРѕР»РµСЃРѕ РїСЂРѕРµС…Р°Р»Рѕ РІРїРµСЂС‘Рґ РѕС‚ С‚РµРєСѓС‰РµР№ РїРѕР·РёС†РёРё
+      // Плюс несколько полных оборотов, чтобы колесо проехало вперёд от текущей позиции
       const k = Math.max(2, Math.floor((wheelAngle - base) / 360) + 3);
       const target = base + k * 360;
       landingLock = { winnerUserId: data.winner.userId, target: target };
 
-      // РџРѕРґСЃРІРµС‚РёС‚СЊ СЃРµРєС‚РѕСЂ Рё Р°РІР°С‚Р°СЂРєСѓ РїРѕР±РµРґРёС‚РµР»СЏ
+      // Подсветить сектор и аватарку победителя
       const wheel = document.getElementById('arenaWheel');
       const pathes = wheel.querySelectorAll('path[data-idx]');
       pathes.forEach((p) => p.classList.toggle('winner', Number(p.dataset.idx) === idx));
@@ -1147,7 +1141,7 @@
       avs.forEach((g) => g.classList.toggle('winner', Number(g.dataset.idx) === idx));
       wheel.classList.add('glow');
 
-      // РђРЅРёРјР°С†РёСЏ РїСЂРёР·РµРјР»РµРЅРёСЏ СЃ Р·Р°РјРµРґР»РµРЅРёРµРј
+      // Анимация приземления с замедлением
       const from = wheelAngle;
       const t0 = performance.now();
       const duration = 2100;
@@ -1175,33 +1169,33 @@
       applyRotation();
     }
 
-    // РЈРїСЂР°РІР»РµРЅРёРµ РєРѕР»РµСЃРѕРј РїРѕ СЃС‚Р°С‚СѓСЃСѓ Р°СЂРµРЅС‹
+    // Управление колесом по статусу арены
     function handleWheelStatus(data) {
       const label = document.getElementById('wheelSpinLabel');
       const result = document.getElementById('wheelResult');
       if (data.status === 'spinning') {
         clearWinnerHighlight();
         startSpin();
-        label.textContent = 'рџЋ° Р¤РѕСЂС‚СѓРЅР° РєСЂСѓС‚РёС‚СЃСЏ...';
+        label.textContent = '🎰 Фортуна крутится...';
         result.style.display = 'none';
       } else if (data.status === 'done' && data.winner) {
         landOnWinner(data);
-        const wName = data.winner.username || data.winner.name || 'РРіСЂРѕРє';
-        label.textContent = 'рџЋЇ РћСЃС‚Р°РЅРѕРІРёР»СЃСЏ РЅР°: ' + wName;
+        const wName = data.winner.username || data.winner.name || 'Игрок';
+        label.textContent = '🎯 Остановился на: ' + wName;
         result.style.display = '';
-        result.innerHTML = 'рџЏ† РџРѕР±РµРґРёС‚РµР»СЊ: <b>' + wName + '</b> Р·Р°Р±РёСЂР°РµС‚ РІРµСЃСЊ Р±Р°РЅРє ' + data.lastBank + ' в­ђ!';
+        result.innerHTML = '🏆 Победитель: <b>' + wName + '</b> забирает весь банк ' + data.lastBank + ' ⭐!';
       } else if (data.status === 'idle') {
         clearWinnerHighlight();
         resetWheel();
-        label.textContent = 'РЎРґРµР»Р°Р№ СЃС‚Р°РІРєСѓ, С‡С‚РѕР±С‹ РЅР°С‡Р°С‚СЊ';
-        // РЈР±РёСЂР°РµРј СЂРµР·СѓР»СЊС‚Р°С‚ С‡РµСЂРµР· РїР°СЂСѓ СЃРµРєСѓРЅРґ РїРѕСЃР»Рµ РЅРѕРІРѕРіРѕ СЂР°СѓРЅРґР°
+        label.textContent = 'Сделай ставку, чтобы начать';
+        // Убираем результат через пару секунд после нового раунда
         if (data.players === 0) {
           result.style.display = 'none';
         }
       }
     }
 
-    // Р’С‹Р±РѕСЂ СЃСѓРјРјС‹ СЃС‚Р°РІРєРё (РїСЂРµСЃРµС‚С‹ РёР»Рё СЃРІРѕСЏ СЃСѓРјРјР°)
+    // Выбор суммы ставки (пресеты или своя сумма)
     const MIN_BET = 50;
     const MAX_BET = 100000;
 
@@ -1235,12 +1229,12 @@
       });
     }
 
-    // РљРЅРѕРїРєР° "Р’ РёРіСЂСѓ"
+    // Кнопка "В игру"
     document.getElementById('arenaPlaceBet').addEventListener('click', async () => {
       const statusEl = document.getElementById('arenaStatus');
       const amount = getSelectedBet();
       if (!amount || amount < MIN_BET || amount > MAX_BET) {
-        statusEl.innerHTML = 'вљ пёЏ Р’РІРµРґРё СЃСѓРјРјСѓ РѕС‚ ' + MIN_BET + ' РґРѕ ' + MAX_BET + ' в­ђ';
+        statusEl.innerHTML = '⚠️ Введи сумму от ' + MIN_BET + ' до ' + MAX_BET + ' ⭐';
         return;
       }
       try {
@@ -1256,18 +1250,18 @@
         });
         const data = await res.json();
         if (data.ok) {
-          statusEl.innerHTML = 'вњ… РўС‹ РІ РёРіСЂРµ РЅР° ' + amount + ' в­ђ!<br>Р‘Р°Р»Р°РЅСЃ: ' + data.balance + ' в­ђ';
+          statusEl.innerHTML = '✅ Ты в игре на ' + amount + ' ⭐!<br>Баланс: ' + data.balance + ' ⭐';
           document.getElementById('balanceValue').textContent = data.balance;
           refreshArena();
         } else {
-          statusEl.innerHTML = 'вќЊ ' + (data.error || 'РћС€РёР±РєР°');
+          statusEl.innerHTML = '❌ ' + (data.error || 'Ошибка');
         }
       } catch (e) {
-        statusEl.innerHTML = 'вќЊ РќРµС‚ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј';
+        statusEl.innerHTML = '❌ Нет связи с сервером';
       }
     });
 
-    // === РР“Р Рђ РњРРќР« ===
+    // === ИГРА МИНЫ ===
     const MINES_API = ARENA_BASE + '/mines';
     const MROWS = 5, MCOLS = 5, MCELLS = MROWS * MCOLS;
     const minesState = { playing: false, bet: 100, mineCount: 3, minesSet: [], opened: 0, mult: 1, payout: 0 };
@@ -1283,7 +1277,7 @@
       document.getElementById('minesScreen').style.display = 'flex';
       document.getElementById('minesScreen').classList.add('idle');
       minesState.playing = false;
-      minesStatusEl.innerHTML = 'РЎРґРµР»Р°Р№ СЃС‚Р°РІРєСѓ, С‡С‚РѕР±С‹ РЅР°С‡Р°С‚СЊ СЂР°СѓРЅРґ';
+      minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
       renderMinesGrid();
       updateMinesUI();
       refreshMinesBalance();
@@ -1317,7 +1311,7 @@
       return arr;
     }
 
-    // РљР»Р°СЃСЃРёС‡РµСЃРєРёРµ С€Р°РЅСЃС‹ РјРёРЅС‹: РєР°Р¶РґС‹Р№ РѕС‚РєСЂС‹С‚С‹Р№ РєР°РјРµРЅСЊ СѓРІРµР»РёС‡РёРІР°РµС‚ РјРЅРѕР¶РёС‚РµР»СЊ
+    // Классические шансы мины: каждый открытый камень увеличивает множитель
     function minesMultFor(k, minesCount) {
       let m = 1;
       for (let i = 0; i < k; i++) {
@@ -1348,11 +1342,11 @@
     function minesGetNick() {
       try {
         const u = tg.initDataUnsafe.user;
-        return (u && (u.username || u.first_name || '')) || ('РРіСЂРѕРє' + myUserId);
-      } catch (e) { return 'РРіСЂРѕРє' + myUserId; }
+        return (u && (u.username || u.first_name || '')) || ('Игрок' + myUserId);
+      } catch (e) { return 'Игрок' + myUserId; }
     }
 
-    // РћС‚РїСЂР°РІР»СЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚ РјР°С‚С‡Р° РЅР° СЃРµСЂРІРµСЂ (РґР»СЏ РёСЃС‚РѕСЂРёРё)
+    // Отправляем результат матча на сервер (для истории)
     async function minesReportResult(resultKind) {
       try {
         await fetch(MINES_API + '/result', {
@@ -1379,7 +1373,7 @@
         const c = minesGridEl.querySelector('[data-i="' + m + '"]');
         if (c && !c.classList.contains('mine')) {
           c.classList.add('hidden-mine');
-          c.textContent = 'рџ’Ј';
+          c.textContent = '💣';
         }
       });
       document.getElementById('minesCashout').disabled = true;
@@ -1392,32 +1386,32 @@
       if (!cell || cell.classList.contains('safe') || cell.classList.contains('mine')) return;
 
       if (minesState.minesSet.includes(i)) {
-        // РќР°СЂРІР°Р»СЃСЏ РЅР° РјРёРЅСѓ: СЃС‚Р°РІРєР° СЃРіРѕСЂР°РµС‚
+        // Нарвался на мину: ставка сгорает
         cell.classList.add('mine');
-        cell.textContent = 'рџ’Ґ';
+        cell.textContent = '💥';
         minesState.payout = 0;
         minesSetGameOver();
         minesReportResult('loss');
-        minesStatusEl.innerHTML = 'рџ’Ґ Р‘СѓРј! РўС‹ РЅР°СЂРІР°Р»СЃСЏ РЅР° РјРёРЅСѓ. РЎС‚Р°РІРєР° <b>' + minesState.bet + ' в­ђ</b> СЃРіРѕСЂРµР»Р°.';
+        minesStatusEl.innerHTML = '💥 Бум! Ты нарвался на мину. Ставка <b>' + minesState.bet + ' ⭐</b> сгорела.';
         refreshMinesBalance();
         return;
       }
 
-      // Р‘РµР·РѕРїР°СЃРЅР°СЏ СЏС‡РµР№РєР°: Р·РµР»С‘РЅР°СЏ РёРєРѕРЅРєР° + Р·РІРµР·РґР°
+      // Безопасная ячейка: зелёная иконка + звезда
       cell.classList.add('safe');
-      cell.textContent = 'в­ђ';
+      cell.textContent = '⭐';
       minesState.opened++;
       minesState.mult = minesMultFor(minesState.opened, minesState.mineCount);
       updateMinesUI();
 
       if (minesState.opened + minesState.mineCount === MCELLS) {
-        // РћС‚РєСЂС‹С‚С‹ РІСЃРµ Р±РµР·РѕРїР°СЃРЅС‹Рµ вЂ” Р°РІС‚Рѕ-РІС‹РїР»Р°С‚Р°
+        // Открыты все безопасные — авто-выплата
         minesState.playing = false;
         minesSetGameOver();
         minesCashout(true);
         return;
       }
-      minesStatusEl.innerHTML = 'РћС‚РєСЂС‹С‚Рѕ: <b>' + minesState.opened + '</b> В· РћСЃС‚Р°Р»РѕСЃСЊ Р±РµР·РѕРїР°СЃРЅС‹С…: <b>' +
+      minesStatusEl.innerHTML = 'Открыто: <b>' + minesState.opened + '</b> · Осталось безопасных: <b>' +
         (MCELLS - minesState.mineCount - minesState.opened) + '</b>';
     }
 
@@ -1437,18 +1431,18 @@
           document.getElementById('balanceValue').textContent = data.balance;
           minesReportResult(auto ? 'win' : 'cashout');
           minesStatusEl.innerHTML = auto
-            ? 'рџЋ‰ РћС‚РєСЂС‹С‚С‹ РІСЃРµ Р±РµР·РѕРїР°СЃРЅС‹Рµ РєР»РµС‚РєРё! Р’С‹РёРіСЂС‹С€ <b>' + win + ' в­ђ</b> Р·Р°С‡РёСЃР»РµРЅ.'
-            : 'рџ’Ћ Р—Р°Р±СЂР°Р» <b>' + win + ' в­ђ</b> (x' + minesState.mult.toFixed(2) + '). РЎС‚Р°РІРєР° ' + minesState.bet + ' в­ђ + РІС‹РёРіСЂС‹С€ Р·Р°С‡РёСЃР»РµРЅС‹.';
+            ? '🎉 Открыты все безопасные клетки! Выигрыш <b>' + win + ' ⭐</b> зачислен.'
+            : '💎 Забрал <b>' + win + ' ⭐</b> (x' + minesState.mult.toFixed(2) + '). Ставка ' + minesState.bet + ' ⭐ + выигрыш зачислены.';
         } else {
-          minesStatusEl.innerHTML = 'вќЊ ' + (data.error || 'РћС€РёР±РєР° РІС‹РїР»Р°С‚С‹');
+          minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка выплаты');
         }
       } catch (e) {
-        minesStatusEl.innerHTML = 'вќЊ РќРµС‚ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј. РџСЂРѕРІРµСЂСЊ РёРЅС‚РµСЂРЅРµС‚ Рё РЅР°Р¶РјРё "Р—Р°Р±СЂР°С‚СЊ" РµС‰С‘ СЂР°Р·.';
+        minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми "Забрать" ещё раз.';
       }
       document.getElementById('minesAgain').style.display = '';
     }
 
-    // РџРѕРІС‚РѕСЂ Р·Р°РїСЂРѕСЃР° РїСЂРё РјРіРЅРѕРІРµРЅРЅРѕРј СЃР±РѕРµ СЃРµС‚Рё (2 РїРѕРїС‹С‚РєРё)
+    // Повтор запроса при мгновенном сбое сети (2 попытки)
     async function minesFetch(url, opts, tries) {
       const max = tries || 2;
       for (let i = 0; i < max; i++) {
@@ -1474,7 +1468,7 @@
       });
     });
 
-    // Р’С‹Р±РѕСЂ СЃС‚Р°РІРєРё (РїСЂРµСЃРµС‚С‹/СЃРІРѕСЏ)
+    // Выбор ставки (пресеты/своя)
     let selectedMinesBet = 100;
     document.querySelectorAll('#minesBetChips .mines-chip').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -1498,7 +1492,7 @@
       })[ch]);
     }
 
-    // Р’РєР»Р°РґРєРё "РСЃС‚РѕСЂРёСЏ" / "РўРѕРї РёРєСЃС‹"
+    // Вкладки "История" / "Топ иксы"
     const minesWrap = document.getElementById('minesHistoryWrap');
     const minesWrapMsg = document.getElementById('minesWrapMsg');
     const minesTabHtml = { history: '', leader: '' };
@@ -1506,45 +1500,45 @@
     async function minesLoadHistory() {
       minesWrapMsg.style.display = 'none';
       minesWrap.style.display = '';
-      minesWrap.innerHTML = 'вЏі Р—Р°РіСЂСѓР·РєР°...';
+      minesWrap.innerHTML = '⏳ Загрузка...';
       try {
         const data = await minesFetch(MINES_API + '/history?userId=' + myUserId, {
           headers: { 'ngrok-skip-browser-warning': 'true' }
         }, 2);
         if (!data.ok || !data.items || !data.items.length) {
-          minesTabHtml.history = 'РџРѕРєР° РЅРµС‚ СЃС‹РіСЂР°РЅРЅС‹С… РјР°С‚С‡РµР№. РЎС‹РіСЂР°Р№ вЂ” Рё СЂРµР·СѓР»СЊС‚Р°С‚ РїРѕСЏРІРёС‚СЃСЏ Р·РґРµСЃСЊ Рё РІ Р›РЎ';
+          minesTabHtml.history = 'Пока нет сыгранных матчей. Сыграй — и результат появится здесь и в ЛС';
         } else {
           minesTabHtml.history = data.items.map((it) => {
             const d = new Date(it.date);
             const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            const icon = it.result === 'loss' ? 'рџ’Ґ' : 'вњ…';
-            const desc = it.result === 'loss' ? 'в€’' + it.bet + ' в­ђ' : '+' + it.payout + ' в­ђ';
+            const icon = it.result === 'loss' ? '💥' : '✅';
+            const desc = it.result === 'loss' ? '−' + it.bet + ' ⭐' : '+' + it.payout + ' ⭐';
             return '<div class="mines-hist-item">' +
               '<span class="mh-nick">' + icon + ' <b>' + minesEscapeHtml(it.username) + '</b></span>' +
               '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
               '<span class="mh-info">' + desc + '</span>' +
-              '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' В· ' + t + '</span>' +
+              '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
             '</div>';
           }).join('');
         }
         minesWrap.innerHTML = minesTabHtml.history;
       } catch (e) {
-        minesWrap.innerHTML = 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РёСЃС‚РѕСЂРёСЋ';
+        minesWrap.innerHTML = 'Не удалось загрузить историю';
       }
     }
 
     async function minesLoadLeaderboard() {
       minesWrapMsg.style.display = 'none';
       minesWrap.style.display = '';
-      minesWrap.innerHTML = 'вЏі Р—Р°РіСЂСѓР·РєР°...';
+      minesWrap.innerHTML = '⏳ Загрузка...';
       try {
         const data = await minesFetch(MINES_API + '/leaderboard', {
           headers: { 'ngrok-skip-browser-warning': 'true' }
         }, 2);
         if (!data.ok || !data.items || !data.items.length) {
-          minesTabHtml.leader = 'РџРѕРєР° РЅРµС‚ РЅРё РѕРґРЅРѕРіРѕ РІС‹РёРіСЂС‹С€Р°. Р—Р°Р±РёСЂР°Р№ Р¶РёСЂРЅС‹Р№ x вЂ” Рё РїРѕРїР°РґС‘С€СЊ РІ С‚РѕРї!';
+          minesTabHtml.leader = 'Пока нет ни одного выигрыша. Забирай жирный x — и попадёшь в топ!';
         } else {
-          const medals = ['рџҐ‡', 'рџҐ€', 'рџҐ‰'];
+          const medals = ['🥇', '🥈', '🥉'];
           minesTabHtml.leader = data.items.map((it, idx) => {
             const d = new Date(it.date);
             const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -1554,15 +1548,15 @@
               '<span class="mh-ava"><img data-uid="' + it.userId + '" src="" alt="" onerror="this.remove()"></span>' +
               '<span class="mh-nick"><b>' + minesEscapeHtml(it.username) + '</b></span>' +
               '<span class="mh-x">x' + (Number(it.mult) || 1).toFixed(2) + '</span>' +
-              '<span class="mh-info">+' + it.payout + ' в­ђ</span>' +
-              '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' В· ' + t + '</span>' +
+              '<span class="mh-info">+' + it.payout + ' ⭐</span>' +
+              '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
             '</div>';
           }).join('');
         }
         minesWrap.innerHTML = minesTabHtml.leader;
         fillAvatarImages(minesWrap, 'src');
       } catch (e) {
-        minesWrap.innerHTML = 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ С‚РѕРї';
+        minesWrap.innerHTML = 'Не удалось загрузить топ';
       }
     }
 
@@ -1586,21 +1580,21 @@
     document.getElementById('minesTabHistory').addEventListener('click', () => minesActivateTab('history'));
     document.getElementById('minesTabLeader').addEventListener('click', () => minesActivateTab('leader'));
 
-    // РљРЅРѕРїРєР° "РРіСЂР°С‚СЊ" РЅР° Р±Р°РЅРЅРµСЂРµ: РІРµРґС‘С‚ Рє РїРѕР»СЋ
+    // Кнопка "Играть" на баннере: ведёт к полю
     document.getElementById('minesHeroPlay').addEventListener('click', () => {
       document.getElementById('minesGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      minesStatusEl.innerHTML = 'рџ‘† Р’С‹Р±РµСЂРё РјРёРЅ РЅР° РїРѕР»Рµ Рё СЃРґРµР»Р°Р№ СЃС‚Р°РІРєСѓ';
+      minesStatusEl.innerHTML = '👆 Выбери мин на поле и сделай ставку';
     });
 
-    // РљРЅРѕРїРєР° "Р’ РёРіСЂСѓ": СЃРїРёСЃС‹РІР°РµРј СЃС‚Р°РІРєСѓ Рё РіРµРЅРµСЂРёСЂСѓРµРј РїРѕР»Рµ
+    // Кнопка "В игру": списываем ставку и генерируем поле
     document.getElementById('minesStart').addEventListener('click', async () => {
       const customVal = document.getElementById('minesCustomBet').value;
       const bet = parseInt(customVal, 10) > 0 ? parseInt(customVal, 10) : selectedMinesBet;
       if (!bet || bet < 5) {
-        minesStatusEl.innerHTML = 'вљ пёЏ Р’РІРµРґРё СЃСѓРјРјСѓ РѕС‚ 5 в­ђ';
+        minesStatusEl.innerHTML = '⚠️ Введи сумму от 5 ⭐';
         return;
       }
-      minesStatusEl.innerHTML = 'вЏі РЎС‚Р°РІРєР° РїСЂРёРЅРёРјР°РµС‚СЃСЏ...';
+      minesStatusEl.innerHTML = '⏳ Ставка принимается...';
       try {
         const data = await minesFetch(MINES_API + '/bet', {
           method: 'POST',
@@ -1614,7 +1608,7 @@
           })
         }, 2);
         if (!data.ok) {
-          minesStatusEl.innerHTML = 'вќЊ ' + (data.error || 'РћС€РёР±РєР°') + (data.balance !== undefined ? ' (Р±Р°Р»Р°РЅСЃ: ' + data.balance + ' в­ђ)' : '');
+          minesStatusEl.innerHTML = '❌ ' + (data.error || 'Ошибка') + (data.balance !== undefined ? ' (баланс: ' + data.balance + ' ⭐)' : '');
           minesBalanceEl.textContent = data.balance !== undefined ? data.balance : minesBalanceEl.textContent;
           return;
         }
@@ -1632,39 +1626,39 @@
         document.getElementById('minesSetupPanel').style.display = 'none';
         document.getElementById('minesAgain').style.display = 'none';
         document.getElementById('minesScreen').classList.remove('idle');
-        minesStatusEl.innerHTML = 'рџЋ® РРіСЂР° РЅР°С‡Р°Р»Р°СЃСЊ. РњРёРЅ: <b>' + selectedMineCount + '</b>, СЃС‚Р°РІРєР°: <b>' + bet + ' в­ђ</b>';
+        minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' ⭐</b>';
         renderMinesGrid();
         updateMinesUI();
       } catch (e) {
-        minesStatusEl.innerHTML = 'вќЊ РќРµС‚ СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј. РџСЂРѕРІРµСЂСЊ РёРЅС‚РµСЂРЅРµС‚ Рё РЅР°Р¶РјРё РµС‰С‘ СЂР°Р·.';
+        minesStatusEl.innerHTML = '❌ Нет связи с сервером. Проверь интернет и нажми ещё раз.';
       }
     });
 
     document.getElementById('minesCashout').addEventListener('click', () => minesCashout(false));
 
-    // РќРѕРІР°СЏ РёРіСЂР°: РІРѕР·РІСЂР°С‚ Рє РЅР°СЃС‚СЂРѕР№РєР°Рј СЃС‚Р°РІРєРё
+    // Новая игра: возврат к настройкам ставки
     document.getElementById('minesAgain').addEventListener('click', () => {
       document.getElementById('minesSetupPanel').style.display = '';
       minesState.playing = false;
       minesState.mult = 1;
       document.getElementById('minesScreen').classList.add('idle');
-      minesStatusEl.innerHTML = 'РЎРґРµР»Р°Р№ СЃС‚Р°РІРєСѓ, С‡С‚РѕР±С‹ РЅР°С‡Р°С‚СЊ СЂР°СѓРЅРґ';
+      minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
       renderMinesGrid();
       updateMinesUI();
       refreshMinesBalance();
     });
 
-    // РћС‚РєСЂС‹С‚РёРµ СЌРєСЂР°РЅР° РјРёРЅС‹ РёР· РєР°СЂС‚РѕС‡РєРё
+    // Открытие экрана мины из карточки
     document.querySelectorAll('[data-open="mines"]').forEach((el) => {
       el.addEventListener('click', minesOpen);
     });
-    // РљРЅРѕРїРєР° В«РРіСЂР°С‚СЊВ» РІРЅСѓС‚СЂРё iframe (miny_card.html) С€Р»С‘С‚ СЃСЋРґР° СЃРѕРѕР±С‰РµРЅРёРµ
+    // Кнопка «Играть» внутри iframe (miny_card.html) шлёт сюда сообщение
     window.addEventListener('message', (e) => {
       if (e.data && e.data.type === 'openMines') minesOpen();
     });
     document.getElementById('minesBack').addEventListener('click', minesClose);
 
-    // РџРµСЂРµС…РѕРґ РЅР° СЌРєСЂР°РЅ Р°СЂРµРЅС‹ РёР· РєР°СЂС‚РѕС‡РєРё
+    // Переход на экран арены из карточки
     document.querySelectorAll('[data-open="arena"]').forEach((el) => {
       el.addEventListener('click', openArenaScreen);
     });
