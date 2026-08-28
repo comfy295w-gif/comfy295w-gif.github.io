@@ -166,49 +166,24 @@
     .game-desc { font-size: 13px; color: var(--muted); }
     .game-arrow { color: var(--muted); font-size: 24px; line-height: 1; }
 
-    /* Карточка Мины: ледяная карточка-баннер с превью поля */
+    /* Карточка Мины: iframe с баннером из miny_card.html */
     .game-card-mines {
       position: relative;
       overflow: hidden;
-      min-height: 220px;
+      min-height: 230px;
       padding: 0;
       background: var(--card);
       border: 1px solid rgba(255,255,255,0.12);
     }
-    .mines-card-face { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .mines-card-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .mines-card-scrim {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(4,8,16,0.62), rgba(4,8,16,0.05) 62%);
-      pointer-events: none;
-    }
-    .mines-card-content {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      justify-content: flex-end; align-items: stretch;
-      gap: 6px; padding: 16px;
-    }
-    .mines-card-title {
-      font-size: 40px; font-weight: 900; letter-spacing: 3px; line-height: 1;
-      color: #ffffff;
-      text-shadow: 0 3px 14px rgba(0,0,0,0.6), 0 0 24px rgba(140,220,255,0.35);
-    }
-    .mines-card-sub {
-      font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.88);
-      text-shadow: 0 1px 6px rgba(0,0,0,0.5);
-    }
-    .mines-card-play {
-      margin-top: 10px;
+    .game-card-mines .mines-card-frame {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      border: none; border-radius: 16px;
-      padding: 15px 0;
-      background: linear-gradient(135deg, #46f59a, #11b292);
-      color: #04231a; font-size: 20px; font-weight: 900; letter-spacing: 1px;
-      cursor: pointer;
-      box-shadow: 0 12px 28px rgba(25,205,150,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
-      transition: transform 0.12s;
+      height: 100%;
+      border: 0;
+      background: transparent;
+      pointer-events: auto;
     }
-    .mines-card-play:active { transform: scale(0.97); }
 
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
     .icon-arena     { background: linear-gradient(135deg,#a18cd1,#fbc2eb); }
@@ -684,87 +659,9 @@
       </div>
 
       <div class="game-card game-card-mines" data-open="mines">
-        <div class="mines-card-face">
-          <svg class="mines-card-bg" viewBox="0 0 340 220" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="mkGreen" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#5ffb9a"/><stop offset="1" stop-color="#15b8a3"/>
-              </linearGradient>
-              <linearGradient id="mkGold" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#ffe28a"/><stop offset="1" stop-color="#ff9d3c"/>
-              </linearGradient>
-              <radialGradient id="mkBomb" cx="0.5" cy="0.5" r="0.5">
-                <stop offset="0" stop-color="rgba(255,85,85,0.6)"/><stop offset="1" stop-color="rgba(255,85,85,0)"/>
-              </radialGradient>
-              <radialGradient id="mkShine" cx="0.5" cy="0.5" r="0.5">
-                <stop offset="0" stop-color="rgba(160,235,255,0.5)"/><stop offset="1" stop-color="rgba(160,235,255,0)"/>
-              </radialGradient>
-              <path id="mkSpark" d="M0 -8 L2.4 -2.4 L8 0 L2.4 2.4 L0 8 L-2.4 2.4 L-8 0 L-2.4 -2.4 Z"/>
-            </defs>
-            <circle cx="120" cy="60" r="95" fill="url(#mkShine)"/>
-            <circle cx="265" cy="185" r="80" fill="url(#mkGreen)"/>
-            <circle cx="205" cy="40" r="60" fill="url(#mkGold)"/>
-            <rect x="110" y="16" width="26" height="26" rx="7" fill="url(#mkGreen)"/>
-            <text x="123" y="34" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="144" y="16" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <rect x="178" y="16" width="26" height="26" rx="7" fill="url(#mkGreen)"/>
-            <text x="191" y="34" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="212" y="16" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <rect x="246" y="16" width="26" height="26" rx="7" fill="url(#mkGold)"/>
-            <text x="259" y="34" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="110" y="50" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <rect x="144" y="50" width="26" height="26" rx="7" fill="url(#mkGold)"/>
-            <text x="157" y="68" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="178" y="50" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <rect x="212" y="50" width="26" height="26" rx="7" fill="url(#mkGreen)"/>
-            <text x="225" y="68" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="246" y="50" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <rect x="110" y="84" width="26" height="26" rx="7" fill="url(#mkGold)"/>
-            <text x="123" y="102" font-size="15" text-anchor="middle">⭐</text>
-            <circle cx="157" cy="97" r="17" fill="url(#mkBomb)"/>
-            <rect x="144" y="84" width="26" height="26" rx="7" fill="rgba(255,90,90,0.35)" stroke="rgba(255,80,80,0.55)" stroke-width="1.2"/>
-            <circle cx="157" cy="97" r="8.5" fill="#2b2b36" stroke="rgba(255,120,120,0.9)" stroke-width="1.6"/>
-            <circle cx="154" cy="94" r="2.6" fill="rgba(255,255,255,0.5)"/>
-            <text x="157" y="101" font-size="12" text-anchor="middle">💣</text>
-            <rect x="178" y="84" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <rect x="212" y="84" width="26" height="26" rx="7" fill="url(#mkGold)"/>
-            <text x="225" y="102" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="246" y="84" width="26" height="26" rx="7" fill="url(#mkGreen)"/>
-            <text x="259" y="102" font-size="15" text-anchor="middle">⭐</text>
-            <circle cx="123" cy="131" r="16" fill="url(#mkBomb)"/>
-            <rect x="110" y="118" width="26" height="26" rx="7" fill="rgba(255,90,90,0.35)" stroke="rgba(255,80,80,0.55)" stroke-width="1.2"/>
-            <circle cx="123" cy="131" r="8.5" fill="#2b2b36" stroke="rgba(255,120,120,0.9)" stroke-width="1.6"/>
-            <circle cx="120" cy="128" r="2.6" fill="rgba(255,255,255,0.5)"/>
-            <text x="123" y="135" font-size="12" text-anchor="middle">💣</text>
-            <rect x="144" y="118" width="26" height="26" rx="7" fill="url(#mkGreen)"/>
-            <text x="157" y="136" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="178" y="118" width="26" height="26" rx="7" fill="url(#mkGold)"/>
-            <text x="191" y="136" font-size="15" text-anchor="middle">⭐</text>
-            <rect x="212" y="118" width="26" height="26" rx="7" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-            <circle cx="259" cy="131" r="16" fill="url(#mkBomb)"/>
-            <rect x="246" y="118" width="26" height="26" rx="7" fill="rgba(255,90,90,0.35)" stroke="rgba(255,80,80,0.55)" stroke-width="1.2"/>
-            <circle cx="259" cy="131" r="8.5" fill="#2b2b36" stroke="rgba(255,120,120,0.9)" stroke-width="1.6"/>
-            <circle cx="256" cy="128" r="2.6" fill="rgba(255,255,255,0.5)"/>
-            <text x="259" y="135" font-size="12" text-anchor="middle">💣</text>
-            <use href="#mkSpark" x="302" y="10" fill="#ffe28a"/>
-            <use href="#mkSpark" x="330" y="72" fill="#ffffff"/>
-            <use href="#mkSpark" x="98" y="6" fill="#ffffff"/>
-            <use href="#mkSpark" x="288" y="170" fill="#ffe28a"/>
-            <use href="#mkSpark" x="338" y="190" fill="#5ffb9a"/>
-            <circle cx="308" cy="120" r="2" fill="#fff" opacity="0.6"/>
-            <circle cx="286" cy="40" r="1.6" fill="#fff" opacity="0.5"/>
-            <circle cx="70" cy="30" r="2" fill="#fff" opacity="0.5"/>
-            <circle cx="52" cy="90" r="1.6" fill="#fff" opacity="0.55"/>
-            <circle cx="84" cy="150" r="2" fill="#fff" opacity="0.5"/>
-            <circle cx="44" cy="188" r="1.6" fill="#fff" opacity="0.45"/>
-          </svg>
-          <div class="mines-card-scrim"></div>
-          <div class="mines-card-content">
-            <div class="mines-card-title">МИНЫ</div>
-            <div class="mines-card-sub">Открывай ячейки и избегай мин</div>
-            <button class="mines-card-play" id="minesCardPlay">Играть</button>
-          </div>
-        </div>
+        <iframe class="mines-card-frame" src="miny_card.html"
+          title="Мины" frameborder="0" scrolling="no"
+          allowtransparency="true"></iframe>
       </div>
 
       <div class="game-card" data-open="arena">
@@ -1909,13 +1806,10 @@
     document.querySelectorAll('[data-open="mines"]').forEach((el) => {
       el.addEventListener('click', minesOpen);
     });
-    const minesCardPlay = document.getElementById('minesCardPlay');
-    if (minesCardPlay) {
-      minesCardPlay.addEventListener('click', (e) => {
-        e.stopPropagation();
-        minesOpen();
-      });
-    }
+    // Кнопка «Играть» внутри iframe (miny_card.html) шлёт сюда сообщение
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'openMines') minesOpen();
+    });
     document.getElementById('minesBack').addEventListener('click', minesClose);
 
     // Переход на экран арены из карточки
