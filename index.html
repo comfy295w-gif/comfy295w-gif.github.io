@@ -505,6 +505,19 @@
     }
     .mines-hero-play:active { transform: scale(0.97); }
 
+    /* История матчей */
+    .mines-hist-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 10px 14px; margin-bottom: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      background-color: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px; font-size: 13px;
+    }
+    .mines-hist-item .mh-nick { flex: 1; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mines-hist-item .mh-info { font-weight: 800; white-space: nowrap; }
+    .mines-hist-item .mh-meta { color: var(--muted); font-size: 11px; white-space: nowrap; }
+
     /* === Нижняя панель навигации (жидкое стекло) === */
     .bottom-nav {
       position: fixed;
@@ -870,6 +883,10 @@
       <div class="mines-status" id="minesStatus">Сделай ставку, чтобы начать раунд</div>
       <div style="text-align:center; margin-top:14px;">
         <button class="mines-new-btn" id="minesAgain" style="display:none;">🔄 Новая игра</button>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="mines-new-btn" id="minesHistoryBtn" style="width:100%; background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04)); color:#fff; box-shadow:none; border:1px solid rgba(255,255,255,0.16);">📜 История матчей</button>
+        <div id="minesHistoryWrap" style="display:none; margin-top:10px;"></div>
       </div>
     </div>
   </div>
@@ -1373,7 +1390,7 @@
     // === ИГРА МИНЫ ===
     const MINES_API = ARENA_BASE + '/mines';
     const MROWS = 5, MCOLS = 5, MCELLS = MROWS * MCOLS;
-    const minesState = { playing: false, bet: 100, mineCount: 3, minesSet: [], opened: 0, mult: 1 };
+    const minesState = { playing: false, bet: 100, mineCount: 3, minesSet: [], opened: 0, mult: 1, payout: 0 };
 
     const minesBalanceEl = document.getElementById('minesBalance');
     const minesStatusEl = document.getElementById('minesStatus');
@@ -1448,6 +1465,33 @@
       document.getElementById('minesCashout').disabled = minesState.opened === 0 || !minesState.playing;
     }
 
+    function minesGetNick() {
+      try {
+        const u = tg.initDataUnsafe.user;
+        return (u && (u.username || u.first_name || '')) || ('Игрок' + myUserId);
+      } catch (e) { return 'Игрок' + myUserId; }
+    }
+
+    // Отправляем результат матча на сервер (для истории)
+    async function minesReportResult(resultKind) {
+      try {
+        await fetch(MINES_API + '/result', {
+          method: 'POST',
+          headers: MINES_FETCH_OPTS.headers,
+          body: JSON.stringify({
+            userId: myUserId,
+            username: minesGetNick(),
+            bet: minesState.bet,
+            opened: minesState.opened,
+            mines: minesState.mineCount,
+            mult: minesState.mult,
+            payout: minesState.payout || 0,
+            result: resultKind
+          })
+        });
+      } catch (e) {}
+    }
+
     function minesSetGameOver() {
       minesState.playing = false;
       minesGridEl.classList.add('ended');
@@ -1471,7 +1515,9 @@
         // Нарвался на мину: ставка сгорает
         cell.classList.add('mine');
         cell.textContent = '💥';
+        minesState.payout = 0;
         minesSetGameOver();
+        minesReportResult('loss');
         minesStatusEl.innerHTML = '💥 Бум! Ты нарвался на мину. Ставка <b>' + minesState.bet + ' ⭐</b> сгорела.';
         refreshMinesBalance();
         return;
@@ -1497,6 +1543,7 @@
 
     async function minesCashout(auto) {
       const win = Math.floor(minesState.bet * minesState.mult);
+      minesState.payout = win;
       minesState.playing = false;
       minesGridEl.classList.add('ended');
       try {
@@ -1508,6 +1555,7 @@
         if (data.ok) {
           minesBalanceEl.textContent = data.balance;
           document.getElementById('balanceValue').textContent = data.balance;
+          minesReportResult(auto ? 'win' : 'cashout');
           minesStatusEl.innerHTML = auto
             ? '🎉 Открыты все безопасные клетки! Выигрыш <b>' + win + ' ⭐</b> зачислен.'
             : '💎 Забрал <b>' + win + ' ⭐</b> (x' + minesState.mult.toFixed(2) + '). Ставка ' + minesState.bet + ' ⭐ + выигрыш зачислены.';
@@ -1564,6 +1612,47 @@
       }
     });
 
+    function minesEscapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[ch]);
+    }
+
+    // История матчей
+    document.getElementById('minesHistoryBtn').addEventListener('click', async () => {
+      const wrap = document.getElementById('minesHistoryWrap');
+      if (wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
+      wrap.style.display = '';
+      wrap.innerHTML = '⏳ Загрузка...';
+      try {
+        const data = await minesFetch(MINES_API + '/history?userId=' + myUserId, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        }, 2);
+        if (!data.ok || !data.items || !data.items.length) {
+          wrap.innerHTML = 'Пока нет сыгранных матчей. Сыграй — и результат появится здесь и в ЛС';
+          return;
+        }
+        const rows = data.items.map((it) => {
+          const d = new Date(it.date);
+          const t = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          const icon = it.result === 'loss' ? '💥' : '✅';
+          const x = 'x' + (Number(it.mult) || 1).toFixed(2);
+          const desc = it.result === 'loss'
+            ? '−' + it.bet + ' ⭐'
+            : '+' + it.payout + ' ⭐';
+          return '<div class="mines-hist-item">' +
+            '<span class="mh-nick">' + icon + ' <b>' + minesEscapeHtml(it.username) + '</b></span>' +
+            '<span class="mh-x">' + x + '</span>' +
+            '<span class="mh-info">' + desc + '</span>' +
+            '<span class="mh-meta">' + it.opened + '/' + (25 - it.mines) + ' · ' + t + '</span>' +
+          '</div>';
+        });
+        wrap.innerHTML = rows.join('');
+      } catch (e) {
+        wrap.innerHTML = 'Не удалось загрузить историю';
+      }
+    });
+
     // Кнопка "Играть" на баннере: ведёт к полю
     document.getElementById('minesHeroPlay').addEventListener('click', () => {
       document.getElementById('minesGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1603,6 +1692,7 @@
         minesState.minesSet = makeMineField(selectedMineCount);
         minesState.opened = 0;
         minesState.mult = 1;
+        minesState.payout = 0;
         minesState.playing = true;
 
         document.getElementById('minesSetupPanel').style.display = 'none';
