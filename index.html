@@ -8,8 +8,8 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     :root {
-      --bg: #0f1220;
-      --card: #1a1f35;
+      --bg: #131316;
+      --card: #1d1d23;
       --card-border: rgba(255,255,255,0.08);
       --accent: #7c5cff;
       --accent2: #00d4ff;
@@ -264,8 +264,8 @@
       justify-content: space-around;
       padding: 7px;
       border-radius: 28px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 45%, rgba(0,0,0,0.10) 100%);
-      background-color: rgba(18,24,44,0.38);
+      background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 45%, rgba(0,0,0,0.10) 100%);
+      background-color: rgba(8,8,10,0.45);
       -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.10);
       backdrop-filter: blur(28px) saturate(185%) brightness(1.10);
       border: 1px solid rgba(255,255,255,0.18);
@@ -281,19 +281,6 @@
       -webkit-user-select: none;
       user-select: none;
     }
-    /* Световая «капля» на верхней кромке стекла */
-    .bottom-nav::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 8%;
-      right: 8%;
-      height: 38%;
-      border-radius: 999px;
-      background: radial-gradient(120% 100% at 50% 0%, rgba(255,255,255,0.40), rgba(255,255,255,0.09) 55%, transparent 75%);
-      pointer-events: none;
-      z-index: 0;
-    }
     /* Живой блик, скользящий по стеклу */
     .bottom-nav::after {
       content: '';
@@ -303,7 +290,7 @@
       left: 0;
       width: 55%;
       transform: skewX(-20deg) translateX(-160%);
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16) 45%, rgba(255,255,255,0.30) 50%, rgba(255,255,255,0.16) 55%, transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.20) 50%, rgba(255,255,255,0.12) 55%, transparent);
       animation: glassShine 7s ease-in-out infinite;
       pointer-events: none;
       z-index: 0;
@@ -455,7 +442,7 @@
         <div class="wheel-needle"></div>
         <div class="arena-wheel" id="arenaWheel">
           <svg viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="98" fill="#1a1f35"/>
+<circle cx="100" cy="100" r="98" fill="#1d1d23"/>
             <text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15">Ждём участников...</text>
           </svg>
         </div>
@@ -688,7 +675,7 @@
     function buildWheelHtml(players) {
       if (players.length === 0) {
         return '<svg viewBox="0 0 200 200">' +
-          '<circle cx="100" cy="100" r="98" fill="#1a1f35"/>' +
+          '<circle cx="100" cy="100" r="98" fill="#1d1d23"/>' +
           '<circle cx="100" cy="100" r="98" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
           '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15" font-family="inherit">Ждём участников...</text>' +
         '</svg>';
@@ -710,7 +697,7 @@
         const large = span > 180 ? 1 : 0;
         slices += '<path d="M' + WHEEL_CX + ' ' + WHEEL_CY + ' L' + p0.x + ' ' + p0.y +
           ' A' + WHEEL_R + ' ' + WHEEL_R + ' 0 ' + large + ' 1 ' + p1.x + ' ' + p1.y + ' Z" ' +
-          'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(15,18,32,0.85)" stroke-width="3" data-idx="' + i + '"/>';
+          'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(12,12,14,0.85)" stroke-width="3" data-idx="' + i + '"/>';
         const av = wheelPoint(cm, WHEEL_AVR);
         const initial = (((p.name || p.username || 'Игрок').trim().charAt(0)) || '?').toUpperCase();
         avatars +=
@@ -726,7 +713,7 @@
       sliceMeta = meta;
       return '<svg viewBox="0 0 200 200">' +
         '<g id="wheelGroup">' + slices + avatars + '</g>' +
-        '<circle cx="100" cy="100" r="46" fill="#0f1220" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
+        '<circle cx="100" cy="100" r="46" fill="#131316" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
         '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="22">🎰</text>' +
       '</svg>';
     }
