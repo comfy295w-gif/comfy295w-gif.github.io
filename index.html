@@ -536,7 +536,8 @@
     .mines-hist-item .mh-x { font-weight: 800; color: #ffd447; white-space: nowrap; }
 
     /* === Экран Профиля === */
-    #profileScreen { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: flex; flex-direction: column; }
+    #profileScreen { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+    #profileScreen.open { transform: translateY(0); }
     .profile-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 14px 16px; border-bottom: 1px solid var(--card-border);
@@ -2124,11 +2125,15 @@
     function openProfileScreen() {
       document.querySelector('.main').style.display = 'none';
       document.querySelector('.top-bar').style.display = 'none';
-      document.getElementById('profileScreen').style.display = 'flex';
+      const ps = document.getElementById('profileScreen');
+      ps.style.display = 'flex';
+      requestAnimationFrame(() => ps.classList.add('open'));
       fillProfileData();
     }
     function closeProfileScreen() {
-      document.getElementById('profileScreen').style.display = 'none';
+      const ps = document.getElementById('profileScreen');
+      ps.classList.remove('open');
+      setTimeout(() => { ps.style.display = 'none'; }, 400);
       document.querySelector('.main').style.display = '';
       document.querySelector('.top-bar').style.display = '';
     }
