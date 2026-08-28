@@ -1234,7 +1234,17 @@
     setActive(currentIdx, false);
 
     navArr.forEach((item, i) => {
-      item.addEventListener('click', () => setActive(i));
+      item.addEventListener('click', () => {
+        setActive(i);
+        const section = item.dataset.section;
+        if (section === 'profile') {
+          openProfileScreen();
+        } else {
+          closeProfileScreen();
+          minesClose();
+          closeArenaScreen();
+        }
+      });
     });
 
     // Свайп: «капля» скользит за пальцем, на отпускании доливает до ближайшего раздела
@@ -2211,24 +2221,6 @@
       }
     });
 
-    // Переключение секций нижней панели
-    function switchNavSection(section) {
-      if (section === 'home' || section === 'tasks' || section === 'games') {
-        closeProfileScreen();
-        minesClose();
-        closeArenaScreen();
-      } else if (section === 'profile') {
-        openProfileScreen();
-      }
-    }
-
-    // Обновляем обработчики навигации
-    navArr.forEach((item) => {
-      item.addEventListener('click', () => {
-        const section = item.dataset.section;
-        switchNavSection(section);
-      });
-    });
   </script>
 </body>
 </html>
