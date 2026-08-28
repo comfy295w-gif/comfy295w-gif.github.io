@@ -1166,37 +1166,36 @@
       topupPayBtn.disabled = true;
       topupPayBtn.textContent = 'Создаю invoice...';
       try {
-        // 1. Запрашиваем инвойс у бота
         const resp = await fetch(SERVER_URL + '/api/create-invoice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
           body: JSON.stringify({ userId: USER_ID, amount })
         });
         const data = await resp.json();
-        if (!data.ok || !data.link) {
-          alert('Ошибка: ' + (data.error || 'Не удалось создать инвойс'));
-          topupPayBtn.disabled = false;
-          topupPayBtn.textContent = 'Оплатить';
+        if (data.ok && data.link) {
+          tg.openInvoice(data.link, (status) => {
+            if (status === 'paid') {
+              topupOverlay.classList.remove('show');
+              fetch(SERVER_URL + '/api/mines/balance?userId=' + USER_ID, {
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+              }).then(r => r.json()).then(d => {
+                if (d.ok) document.getElementById('balanceValue').textContent = d.balance;
+              }).catch(() => {});
+            }
+            topupPayBtn.disabled = false;
+            topupPayBtn.textContent = 'Оплатить';
+          });
           return;
         }
-        // 2. Открываем оплату прямо в мини-аппе
-        tg.openInvoice(data.link, (status) => {
-          if (status === 'paid') {
-            topupOverlay.classList.remove('show');
-            // Обновляем баланс
-            fetch(SERVER_URL + '/api/mines/balance?userId=' + USER_ID, {
-              headers: { 'ngrok-skip-browser-warning': 'true' }
-            }).then(r => r.json()).then(d => {
-              if (d.ok) document.getElementById('balanceValue').textContent = d.balance;
-            }).catch(() => {});
-          } else if (status === 'cancelled') {
-            // отмена — ничего
-          }
-          topupPayBtn.disabled = false;
-          topupPayBtn.textContent = 'Оплатить';
-        });
-      } catch (e) {
-        alert('Ошибка сети: ' + e.message);
+      } catch (e) {}
+      // Fallback: sendData в бот — бот сам отправит инвойс
+      try {
+        tg.sendData(JSON.stringify({ type: 'topup', amount: amount }));
+        topupOverlay.classList.remove('show');
+        topupPayBtn.disabled = false;
+        topupPayBtn.textContent = 'Оплатить';
+      } catch (e2) {
+        alert('Ошибка. Попробуй пополнить через бота: /topup ' + amount);
         topupPayBtn.disabled = false;
         topupPayBtn.textContent = 'Оплатить';
       }
