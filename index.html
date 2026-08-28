@@ -8,8 +8,8 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     :root {
-      --bg: #131316;
-      --card: #1d1d23;
+      --bg: #000000;
+      --card: #000000;
       --card-border: rgba(255,255,255,0.08);
       --accent: #7c5cff;
       --accent2: #00d4ff;
@@ -265,7 +265,7 @@
       padding: 7px;
       border-radius: 28px;
       background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 45%, rgba(0,0,0,0.10) 100%);
-      background-color: rgba(8,8,10,0.45);
+      background-color: rgba(0,0,0,0.55);
       -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.10);
       backdrop-filter: blur(28px) saturate(185%) brightness(1.10);
       border: 1px solid rgba(255,255,255,0.18);
@@ -442,7 +442,7 @@
         <div class="wheel-needle"></div>
         <div class="arena-wheel" id="arenaWheel">
           <svg viewBox="0 0 200 200">
-<circle cx="100" cy="100" r="98" fill="#1d1d23"/>
+<circle cx="100" cy="100" r="98" fill="#000000"/>
             <text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15">Ждём участников...</text>
           </svg>
         </div>
@@ -675,7 +675,7 @@
     function buildWheelHtml(players) {
       if (players.length === 0) {
         return '<svg viewBox="0 0 200 200">' +
-          '<circle cx="100" cy="100" r="98" fill="#1d1d23"/>' +
+          '<circle cx="100" cy="100" r="98" fill="#000000"/>' +
           '<circle cx="100" cy="100" r="98" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
           '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="15" font-family="inherit">Ждём участников...</text>' +
         '</svg>';
@@ -697,7 +697,7 @@
         const large = span > 180 ? 1 : 0;
         slices += '<path d="M' + WHEEL_CX + ' ' + WHEEL_CY + ' L' + p0.x + ' ' + p0.y +
           ' A' + WHEEL_R + ' ' + WHEEL_R + ' 0 ' + large + ' 1 ' + p1.x + ' ' + p1.y + ' Z" ' +
-          'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(12,12,14,0.85)" stroke-width="3" data-idx="' + i + '"/>';
+          'fill="' + WHEEL_COLORS[i % WHEEL_COLORS.length] + '" stroke="rgba(0,0,0,0.85)" stroke-width="3" data-idx="' + i + '"/>';
         const av = wheelPoint(cm, WHEEL_AVR);
         const initial = (((p.name || p.username || 'Игрок').trim().charAt(0)) || '?').toUpperCase();
         avatars +=
@@ -713,7 +713,7 @@
       sliceMeta = meta;
       return '<svg viewBox="0 0 200 200">' +
         '<g id="wheelGroup">' + slices + avatars + '</g>' +
-        '<circle cx="100" cy="100" r="46" fill="#131316" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
+        '<circle cx="100" cy="100" r="46" fill="#000000" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>' +
         '<text x="100" y="104" text-anchor="middle" fill="#8b91a7" font-size="22">🎰</text>' +
       '</svg>';
     }
