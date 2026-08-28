@@ -166,14 +166,23 @@
     .game-desc { font-size: 13px; color: var(--muted); }
     .game-arrow { color: var(--muted); font-size: 24px; line-height: 1; }
 
-    /* Карточка Мины */
+    /* Карточка Мины — широкий баннер */
     .game-card-mines {
       position: relative;
       overflow: hidden;
+      flex: none;
+      height: 200px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
     }
-    .game-card-mines .game-icon {
-      background: url('mines_card.png') center/cover no-repeat;
-      border-radius: 20px;
+    .game-card-mines img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 22px;
     }
 
     .icon-upgrade   { background: linear-gradient(135deg,#ff6b6b,#ff8e53); }
@@ -611,12 +620,7 @@
       </div>
 
       <div class="game-card game-card-mines" data-open="mines">
-        <div class="game-icon" style="background: url('mines_card.png') center/cover no-repeat;"></div>
-        <div class="game-info">
-          <div class="game-name">Мины</div>
-          <div class="game-desc">Открывай ячейки и избегай мин</div>
-        </div>
-        <div class="game-arrow">›</div>
+        <img src="mines_card.png" alt="Мины">
       </div>
 
       <div class="game-card" data-open="arena">
