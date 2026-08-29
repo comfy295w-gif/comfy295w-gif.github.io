@@ -801,8 +801,8 @@
       pointer-events: none;
     }
     .roulette-cell .cell-dog {
-      width: 85%;
-      height: 85%;
+      width: 98%;
+      height: 98%;
       object-fit: contain;
       position: relative;
       z-index: 1;
@@ -1489,7 +1489,7 @@
           const c = document.createElement('div');
           c.className = 'roulette-cell';
           const img = document.createElement('img');
-          img.src = 'snoop.png';
+          img.src = Math.random() < 0.5 ? 'snoop.png' : 'car.png';
           img.className = 'cell-dog';
           img.alt = '';
           c.appendChild(img);
