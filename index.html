@@ -749,6 +749,33 @@
       border-radius: 24px;
       border: 1px solid rgba(255,255,255,0.10);
     }
+    .inventory-section { margin-top: 20px; }
+    .inventory-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      margin: 0 0 10px;
+    }
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .inventory-item {
+      border-radius: 16px;
+      overflow: hidden;
+      background: radial-gradient(circle at center, rgba(80,160,255,0.25) 0%, rgba(40,100,200,0.08) 50%, transparent 75%);
+      border: 1px solid rgba(255,255,255,0.10);
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .inventory-item img {
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+    }
 
     /* Рулетка открытия кейса */
     .case-opener { margin: 6px 0 16px; }
@@ -1210,6 +1237,10 @@
           <img src="snoopdog.jpg" alt="Snoop Dogg">
         </div>
       </div>
+      <div class="inventory-section">
+        <h3 class="inventory-title">Инвентарь</h3>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </div>
     </div>
 
   </div>
@@ -1556,8 +1587,17 @@
             track.style.transform = 'translateX(' + offset + 'px)';
             setTimeout(function () {
               track.querySelectorAll('.roulette-cell').forEach(function (c) { c.classList.remove('result'); });
-              if (track.children[land]) track.children[land].classList.add('result');
-              statusEl.innerHTML = '🎉 Кейс открыт! Линия указала на ячейку #' + (land + 1);
+              if (track.children[land]) {
+                track.children[land].classList.add('result');
+                var droppedImg = track.children[land].querySelector('img');
+                if (droppedImg) {
+                  var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
+                  inv.push(droppedImg.src.split('/').pop());
+                  localStorage.setItem('caseInventory', JSON.stringify(inv));
+                  renderInventory();
+                }
+              }
+              statusEl.innerHTML = '';
               caseSpinning = false;
             }, 4700);
           } catch (e) {
@@ -1567,6 +1607,22 @@
         });
       }
     })();
+
+    function renderInventory() {
+      var grid = document.getElementById('inventoryGrid');
+      if (!grid) return;
+      var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
+      grid.innerHTML = '';
+      inv.forEach(function (name) {
+        var div = document.createElement('div');
+        div.className = 'inventory-item';
+        var img = document.createElement('img');
+        img.src = name;
+        div.appendChild(img);
+        grid.appendChild(div);
+      });
+    }
+    renderInventory();
 
     // Нижняя панель: жидкий индикатор-«капля» + свайп между разделами
     const navItems = document.querySelectorAll('.nav-item');
