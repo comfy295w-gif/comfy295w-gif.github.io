@@ -846,6 +846,25 @@
       font-size: 14px;
       color: var(--gold);
     }
+
+    /* Экран открытия кейса */
+    #caseScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 10px 12px 22px;
+    }
+    .case-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 2px 14px;
+    }
+    .case-header h2 { font-size: 20px; font-weight: 800; margin: 0; }
+    #caseScreen .case-opener { margin-top: auto; margin-bottom: auto; }
     .bottom-nav {
       position: fixed;
       left: 14px;
@@ -1192,7 +1211,20 @@
 
     <!-- Подарки -->
     <div id="gifts" class="tab-content" style="display:none;">
-      <!-- Рулетка открытия кейса -->
+      <div class="gifts-grid">
+        <div class="gift-case" data-gift="snoop-dog">
+          <img src="snoopdog.jpg" alt="Snoop Dogg">
+        </div>
+      </div>
+    </div>
+
+    <!-- Экран открытия кейса (рулетка) -->
+    <div id="caseScreen" style="display:none;">
+      <div class="case-header">
+        <button class="back-btn" id="caseBack">‹</button>
+        <h2>🎁 Кейс</h2>
+        <div></div>
+      </div>
       <div class="case-opener">
         <div class="roulette-viewport">
           <div class="roulette-line"></div>
@@ -1200,11 +1232,6 @@
         </div>
         <button class="open-case-btn" id="openCaseBtn">Открыть за 100 <img src="star.png" class="star-icon" alt="⭐"></button>
         <div class="case-status" id="caseStatus"></div>
-      </div>
-      <div class="gifts-grid">
-        <div class="gift-case" data-gift="snoop-dog">
-          <img src="snoopdog.jpg" alt="Snoop Dogg">
-        </div>
       </div>
     </div>
   </div>
@@ -1448,18 +1475,20 @@
       });
     });
 
-    // === Рулетка открытия кейса ===
+    // === Открытие кейса (рулетка) ===
     (function () {
       const CELL_W = 88, GAP = 10, STEP = CELL_W + GAP, CELLS = 80;
       const track = document.getElementById('rouletteTrack');
       const btn = document.getElementById('openCaseBtn');
       const statusEl = document.getElementById('caseStatus');
-      const centerFirst = function () {
+      const caseScreen = document.getElementById('caseScreen');
+
+      function centerTrack() {
         if (!track) return;
         const vp = track.parentElement.clientWidth;
         track.style.transition = 'none';
         track.style.transform = 'translateX(' + (vp / 2 - CELL_W / 2) + 'px)';
-      };
+      }
       if (track) {
         track.innerHTML = '';
         for (let i = 0; i < CELLS; i++) {
@@ -1470,9 +1499,30 @@
           c.appendChild(g);
           track.appendChild(c);
         }
-        centerFirst();
-        window.addEventListener('resize', centerFirst);
+        window.addEventListener('resize', centerTrack);
       }
+      function caseOpen() {
+        if (!caseScreen) return;
+        document.querySelector('.main').style.display = 'none';
+        document.querySelector('.bottom-nav').style.display = 'none';
+        document.querySelector('.top-bar').style.display = 'none';
+        caseScreen.style.display = 'flex';
+        if (statusEl) statusEl.innerHTML = '';
+        centerTrack();
+      }
+      function caseClose() {
+        if (!caseScreen) return;
+        caseScreen.style.display = 'none';
+        document.querySelector('.main').style.display = '';
+        document.querySelector('.bottom-nav').style.display = '';
+        document.querySelector('.top-bar').style.display = '';
+      }
+      document.querySelectorAll('.gift-case').forEach(function (el) {
+        el.addEventListener('click', caseOpen);
+      });
+      const backBtn = document.getElementById('caseBack');
+      if (backBtn) backBtn.addEventListener('click', caseClose);
+
       if (btn) {
         btn.addEventListener('click', async function () {
           if (btn.disabled) return;
