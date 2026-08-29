@@ -801,7 +801,12 @@
       pointer-events: none;
     }
     .roulette-cell .cell-dog {
-      display: none;
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 8px rgba(100,180,255,0.4));
     }
     .roulette-cell.result {
       border-color: rgba(255,255,255,0.6);
