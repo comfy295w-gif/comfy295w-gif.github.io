@@ -1620,7 +1620,7 @@
       var grid = document.getElementById('inventoryGrid');
       if (!grid) return;
       var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
-      var prices = { 'gift1.png': '634 ⭐', 'gift2.png': '10 410 ⭐', 'gift3.png': '???' };
+      var prices = { 'gift1.png': '634 ⭐', 'gift2.png': '10 410 ⭐', 'gift3.png': '10 410 ⭐' };
       grid.innerHTML = '';
       inv.forEach(function (name) {
         var div = document.createElement('div');
