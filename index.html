@@ -1468,6 +1468,7 @@
       <div style="margin-top:16px; display:flex; gap:10px; justify-content:center; align-items:center;">
         <button class="mines-play-btn" id="minesStart">🎮 Играть — 100 <img src="star.png" class="star-icon" alt="⭐"></button>
         <button class="mines-cash-btn" id="minesCashout" style="display:none;">💎 Забрать — <span id="minesCashPayout">0</span> <img src="star.png" class="star-icon" alt="⭐"></button>
+        <button class="mines-play-btn" id="minesAgain" style="display:none;">🔄 Играть снова</button>
       </div>
       <div id="minesStatus" style="text-align:center; font-size:13px; color:var(--muted); margin-top:10px; min-height:16px;"></div>
       <div style="margin-top:16px;">
@@ -1653,6 +1654,22 @@
     const params = new URLSearchParams(window.location.search);
     const balanceCount = parseInt(params.get('balance') || '0', 10);
     document.getElementById('balanceValue').textContent = isNaN(balanceCount) ? 0 : balanceCount;
+
+    // Подтягиваем актуальный баланс с сервера (на случай /give или другого пополнения)
+    const SERVER_URL = localStorage.getItem('minesServerUrl') || 'https://linguist-cloud-manned.ngrok-free.dev';
+    (async function() {
+      try {
+        const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
+        if (!uid) return;
+        const res = await fetch(SERVER_URL + '/api/balance?userId=' + uid, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
+        const data = await res.json();
+        if (data.ok && data.balance !== undefined) {
+          document.getElementById('balanceValue').textContent = data.balance;
+        }
+      } catch (e) {}
+    })();
 
     // Показываем имя пользователя в профиле (уголок)
     try {
