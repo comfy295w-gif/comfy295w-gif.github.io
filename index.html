@@ -412,49 +412,6 @@
       transform: perspective(300px) translateZ(8px);
     }
     .mines-chip:active { transform: perspective(300px) translateZ(2px) scale(0.96); }
-
-    /* === Панели настроек Мин (жидкое стекло, как нижняя панель) === */
-    .mines-panel { margin-top: 12px; }
-    .mines-panel-title {
-      font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 0.3px;
-      padding: 0 4px 8px;
-    }
-    .mines-toggle-wrap {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      padding: 8px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 45%, rgba(0,0,0,0.10) 100%);
-      background-color: rgba(0,0,0,0.55);
-      -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.10);
-      backdrop-filter: blur(28px) saturate(185%) brightness(1.10);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-top: 1px solid rgba(255,255,255,0.28);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.28), 0 18px 40px rgba(0,0,0,0.55), 0 4px 10px rgba(0,0,0,0.35);
-      -webkit-user-select: none; user-select: none;
-    }
-    .mines-toggle-btn {
-      flex: 1 1 calc(50% - 8px);
-      min-width: 0;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 18px 0;
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
-      background-color: rgba(0,0,0,0.30);
-      border: 1px solid rgba(255,255,255,0.14);
-      color: rgba(255,255,255,0.72);
-      font-size: 17px; font-weight: 800; letter-spacing: 0.3px;
-      cursor: pointer;
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
-      backdrop-filter: blur(12px) saturate(160%);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 6px 16px rgba(0,0,0,0.35);
-      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s, box-shadow 0.25s, color 0.25s, border-color 0.25s;
-    }
-    .mines-toggle-btn:active { transform: scale(0.95); }
-    .mines-toggle-btn.selected {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; border-color: transparent;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.45), 0 8px 22px rgba(124,92,255,0.5), 0 0 22px rgba(124,92,255,0.4);
-    }
     .mines-bet-row { margin-top: 2px; }
     .mines-bet-input {
       width: 88px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
@@ -640,37 +597,6 @@
 
     /* === Экран Профиля === */
     #profileScreen { position: fixed; top: 0; left: 0; right: 0; bottom: calc(62px + env(safe-area-inset-bottom)); z-index: 50; background: var(--bg); display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
-
-    /* === Плавные переходы между режимами === */
-    .main, .bottom-nav, .top-bar {
-      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s ease;
-      transform-origin: center center;
-      will-change: transform, opacity;
-    }
-    .main.shrink, .bottom-nav.shrink, .top-bar.shrink {
-      transform: scale(0.9);
-      opacity: 0;
-    }
-    .main.pop-in { animation: mainPop 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
-    @keyframes mainPop {
-      from { transform: scale(0.94); opacity: 0; }
-      to   { transform: scale(1);    opacity: 1; }
-    }
-    /* Экраны игр: вход с лёгким увеличением и плавным проявлением */
-    #minesScreen, #arenaScreen {
-      opacity: 0;
-      transform: scale(1.06);
-      transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.26s ease;
-      pointer-events: none;
-    }
-    #minesScreen.screen-in, #arenaScreen.screen-in {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-    }
-    /* Лёгкая реакция карточек на нажатие */
-    .game-card { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .game-card:active { transform: scale(0.96); }
     #profileScreen.open { transform: translateY(0); }
     .profile-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -1145,22 +1071,18 @@
     <div class="mines-body">
       <div id="minesXLabel" class="mines-x-label" style="display:none;">1.00x</div>
       <div class="mines-grid" id="minesGrid"></div>
-      <div style="margin-top:14px; display:flex; flex-direction:column; gap:14px;">
-        <div class="mines-panel">
-          <div class="mines-panel-title">Размер поля</div>
-          <div class="mines-toggle-wrap">
-            <button class="mines-toggle-btn selected" data-size="5">5×5</button>
-            <button class="mines-toggle-btn" data-size="4">4×4</button>
-          </div>
+      <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+        <div class="mines-size-row" style="display:flex; gap:8px; justify-content:flex-start; align-items:center;">
+          <span style="font-size:13px;color:var(--muted);font-weight:600;">Поле:</span>
+          <button class="mines-chip selected" data-size="5">5×5</button>
+          <button class="mines-chip" data-size="4">4×4</button>
         </div>
-        <div class="mines-panel">
-          <div class="mines-panel-title">Количество мин</div>
-          <div class="mines-toggle-wrap">
-            <button class="mines-toggle-btn" data-mines="2">2</button>
-            <button class="mines-toggle-btn" data-mines="4">4</button>
-            <button class="mines-toggle-btn selected" data-mines="8">8</button>
-            <button class="mines-toggle-btn" data-mines="10">10</button>
-          </div>
+        <div class="mines-mines-row" style="display:flex; gap:8px; justify-content:flex-start; align-items:center;">
+          <span style="font-size:13px;color:var(--muted);font-weight:600;">Мины:</span>
+          <button class="mines-chip" data-mines="2">2</button>
+          <button class="mines-chip" data-mines="4">4</button>
+          <button class="mines-chip selected" data-mines="8">8</button>
+          <button class="mines-chip" data-mines="10">10</button>
         </div>
         <div class="mines-bet-row" style="display:flex; gap:8px; justify-content:flex-start; align-items:center; flex-wrap:wrap;">
           <span style="font-size:13px;color:var(--muted);font-weight:600;">Ставка:</span>
@@ -1571,47 +1493,20 @@
       } catch (e) { return 'Игрок'; }
     }
 
-    // === Плавные переходы между режимами ===
-    function _chromeHide() {
-      document.querySelector('.main').classList.add('shrink');
-      document.querySelector('.bottom-nav').classList.add('shrink');
-      document.querySelector('.top-bar').classList.add('shrink');
-    }
-    function _chromeShow() {
-      const m = document.querySelector('.main'), n = document.querySelector('.bottom-nav'), t = document.querySelector('.top-bar');
-      m.classList.remove('shrink'); n.classList.remove('shrink'); t.classList.remove('shrink');
-      m.style.display = ''; n.style.display = ''; t.style.display = '';
-      m.classList.add('pop-in');
-      setTimeout(() => m.classList.remove('pop-in'), 340);
-    }
-    // Сначала главный экран «сжимается», затем режим плавно появляется
-    function openMode(screenEl, enterClass) {
-      _chromeHide();
-      setTimeout(() => {
-        const m = document.querySelector('.main'), n = document.querySelector('.bottom-nav'), t = document.querySelector('.top-bar');
-        m.style.display = 'none'; n.style.display = 'none'; t.style.display = 'none';
-        m.classList.remove('shrink'); n.classList.remove('shrink'); t.classList.remove('shrink');
-        screenEl.style.display = 'flex';
-        void screenEl.offsetWidth;
-        if (enterClass) screenEl.classList.add(enterClass);
-      }, 200);
-    }
-    function closeMode(screenEl, exitClass, delay) {
-      if (exitClass) screenEl.classList.remove(exitClass);
-      setTimeout(() => {
-        screenEl.style.display = 'none';
-        _chromeShow();
-      }, delay || 300);
-    }
-
-    // Открыть экран арены
+    // Открыть экран арены (правильно — переключаем, сохраняя nav.html)
     function openArenaScreen() {
-      openMode(document.getElementById('arenaScreen'), 'screen-in');
+      document.querySelector('.main').style.display = 'none';
+      document.querySelector('.bottom-nav').style.display = 'none';
+      document.querySelector('.top-bar').style.display = 'none';
+      document.getElementById('arenaScreen').style.display = 'flex';
       refreshArena();
       arenaRefreshTimer = setInterval(refreshArena, 3000);
     }
     function closeArenaScreen() {
-      closeMode(document.getElementById('arenaScreen'), 'screen-in');
+      document.getElementById('arenaScreen').style.display = 'none';
+      document.querySelector('.main').style.display = '';
+      document.querySelector('.bottom-nav').style.display = '';
+      document.querySelector('.top-bar').style.display = '';
       if (arenaRefreshTimer) { clearInterval(arenaRefreshTimer); arenaRefreshTimer = null; }
     }
 
@@ -1931,7 +1826,10 @@
     const minesGridEl = document.getElementById('minesGrid');
 
     function minesOpen() {
-      openMode(document.getElementById('minesScreen'), 'screen-in');
+      document.querySelector('.main').style.display = 'none';
+      document.querySelector('.bottom-nav').style.display = 'none';
+      document.querySelector('.top-bar').style.display = 'none';
+      document.getElementById('minesScreen').style.display = 'flex';
       document.getElementById('minesScreen').classList.add('idle');
       minesState.playing = false;
       if(minesStatusEl) minesStatusEl.innerHTML = 'Сделай ставку, чтобы начать раунд';
@@ -1940,7 +1838,10 @@
       refreshMinesBalance();
     }
     function minesClose() {
-      closeMode(document.getElementById('minesScreen'), 'screen-in');
+      document.getElementById('minesScreen').style.display = 'none';
+      document.querySelector('.main').style.display = '';
+      document.querySelector('.bottom-nav').style.display = '';
+      document.querySelector('.top-bar').style.display = '';
     }
 
     async function refreshMinesBalance() {
@@ -1978,7 +1879,7 @@
       MROWS=n; MCOLS=n; MCELLS=n*n;
       const g=document.getElementById('minesGrid'); if(g) g.style.gridTemplateColumns='repeat('+n+', 1fr)';
       renderMinesGrid();
-      document.querySelectorAll('.mines-panel [data-size]').forEach(b=>b.classList.toggle('selected', Number(b.dataset.size)===n));
+      document.querySelectorAll('.mines-size-row .mines-chip').forEach(b=>b.classList.toggle('selected', Number(b.dataset.size)===n));
     }
     function renderMinesGrid() {
       const gridEl=document.getElementById('minesGrid'); if(gridEl) gridEl.style.gridTemplateColumns='repeat('+MCOLS+', 1fr)';
@@ -2144,14 +2045,14 @@
 
     let selectedMineCount = 8;
     let selectedMinesBet = 100;
-    // Размер поля: 4x4 / 5x5
-    document.querySelectorAll('.mines-panel [data-size]').forEach((btn)=>{
+    // Размер поля: 4x4 / 5x5 (кнопки такие же как mines-chip)
+    document.querySelectorAll('.mines-size-row .mines-chip').forEach((btn)=>{
       btn.addEventListener('click',()=> setMinesFieldSize(Number(btn.dataset.size)));
     });
     // Выбор количества мин: 2,4,8,10
-    document.querySelectorAll('.mines-panel [data-mines]').forEach((btn)=>{
+    document.querySelectorAll('.mines-mines-row .mines-chip').forEach((btn)=>{
       btn.addEventListener('click',()=>{
-        document.querySelectorAll('.mines-panel [data-mines]').forEach(b=>b.classList.remove('selected'));
+        document.querySelectorAll('.mines-mines-row .mines-chip').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedMineCount = Number(btn.dataset.mines);
       });
@@ -2365,11 +2266,19 @@
     let profileStatsLoaded = false;
 
     function openProfileScreen() {
-      openMode(document.getElementById('profileScreen'), 'open');
+      document.querySelector('.main').style.display = 'none';
+      document.querySelector('.top-bar').style.display = 'none';
+      const ps = document.getElementById('profileScreen');
+      ps.style.display = 'flex';
+      requestAnimationFrame(() => ps.classList.add('open'));
       fillProfileData();
     }
     function closeProfileScreen() {
-      closeMode(document.getElementById('profileScreen'), 'open', 420);
+      const ps = document.getElementById('profileScreen');
+      ps.classList.remove('open');
+      setTimeout(() => { ps.style.display = 'none'; }, 400);
+      document.querySelector('.main').style.display = '';
+      document.querySelector('.top-bar').style.display = '';
     }
 
     function fillProfileData() {
