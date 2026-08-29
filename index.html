@@ -897,6 +897,123 @@
     }
     .case-header h2 { font-size: 20px; font-weight: 800; margin: 0; }
     #caseScreen .case-opener { margin-top: 12px; margin-bottom: auto; }
+
+    /* Апгрейдер */
+    #upgradeScreen {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      padding: 10px 12px 22px;
+    }
+    .upgrade-body { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 10px; }
+
+    /* Колесо */
+    .upgrade-wheel-wrap {
+      position: relative;
+      width: 260px; height: 260px;
+      margin: 0 auto 18px;
+    }
+    .upgrade-wheel {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.2);
+      box-shadow: 0 0 30px rgba(100,180,255,0.3), inset 0 0 20px rgba(0,0,0,0.4);
+      transition: transform 4s cubic-bezier(0.12,0.84,0.22,1);
+      transform: rotate(0deg);
+      overflow: hidden;
+    }
+    .upgrade-wheel.spinning { transition: transform 4.5s cubic-bezier(0.12,0.84,0.22,1); }
+    .upgrade-pointer {
+      position: absolute;
+      top: -8px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 20px solid var(--gold);
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+      z-index: 5;
+    }
+
+    /* Слоты */
+    .upgrade-slots { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .upgrade-slot {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .upgrade-slot-label {
+      font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .upgrade-slot-img {
+      width: 100px; height: 100px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+    .upgrade-slot-img:active { border-color: var(--accent); box-shadow: 0 0 12px rgba(100,180,255,0.3); }
+    .upgrade-slot-img img { width: 85%; height: 85%; object-fit: contain; }
+    .upgrade-plus { font-size: 32px; color: var(--muted); font-weight: 300; }
+    .upgrade-arrow { font-size: 28px; color: var(--muted); margin-top: 18px; }
+
+    .upgrade-chance {
+      font-size: 15px; font-weight: 700; color: var(--gold);
+      margin-bottom: 14px;
+    }
+
+    .upgrade-btn {
+      width: 100%; max-width: 320px;
+      padding: 16px;
+      border-radius: 18px;
+      border: none;
+      background: linear-gradient(135deg, #4a90d9 0%, #2563eb 100%);
+      color: #fff;
+      font-size: 17px; font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s, opacity 0.2s;
+      box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+    }
+    .upgrade-btn:active { transform: scale(0.97); }
+    .upgrade-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+    .upgrade-status {
+      margin-top: 12px;
+      font-size: 14px; font-weight: 700;
+      min-height: 20px;
+      text-align: center;
+    }
+    .upgrade-status.win { color: #22c55e; }
+    .upgrade-status.lose { color: #ef4444; }
+
+    /* Модалка выбора подарка */
+    .upgrade-pick-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.7);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .upgrade-pick-overlay.show { display: flex; }
+    .upgrade-pick-sheet {
+      width: 100%; max-width: 420px;
+      background: #1a1e2e;
+      border-radius: 24px 24px 0 0;
+      padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+      max-height: 60vh; overflow-y: auto;
+    }
+    .upgrade-pick-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 14px; text-align: center; }
+    .upgrade-pick-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .upgrade-pick-item {
+      border-radius: 14px; overflow: hidden;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex; flex-direction: column; align-items: center; padding: 8px 4px;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .upgrade-pick-item:active { border-color: var(--accent); }
+    .upgrade-pick-item img { width: 70%; aspect-ratio: 1; object-fit: contain; }
+    .upgrade-pick-item .pick-price { font-size: 11px; font-weight: 700; color: var(--gold); margin-top: 4px; }
     .bottom-nav {
       position: fixed;
       left: 14px;
@@ -1226,7 +1343,7 @@
 
     <!-- Игры -->
     <div id="games" class="tab-content">
-      <div class="game-card game-card-upgrade">
+      <div class="game-card game-card-upgrade" data-open="upgrade">
         <img src="upgrade_card.png" alt="Апгрейд">
       </div>
 
@@ -1270,6 +1387,49 @@
       </div>
       <div id="openCaseBtn" class="open-case-img" role="button" alt="Открыть"></div>
       <div class="case-status" id="caseStatus"></div>
+    </div>
+  </div>
+
+  <!-- Экран Апгрейдер -->
+  <div id="upgradeScreen" style="display:none;">
+    <div class="case-header">
+      <button class="back-btn" id="upgradeBack">‹</button>
+      <h2>Апгрейдер</h2>
+      <div></div>
+    </div>
+    <div class="upgrade-body">
+      <div class="upgrade-wheel-wrap">
+        <div class="upgrade-pointer"></div>
+        <div class="upgrade-wheel" id="upgradeWheel"></div>
+      </div>
+      <div class="upgrade-slots">
+        <div class="upgrade-slot" id="upgradeFrom">
+          <div class="upgrade-slot-label">Твой подарок</div>
+          <div class="upgrade-slot-img" id="upgradeFromImg">
+            <span class="upgrade-plus">+</span>
+          </div>
+        </div>
+        <div class="upgrade-arrow">→</div>
+        <div class="upgrade-slot" id="upgradeTo">
+          <div class="upgrade-slot-label">Цель</div>
+          <div class="upgrade-slot-img" id="upgradeToImg">
+            <span class="upgrade-plus">+</span>
+          </div>
+        </div>
+      </div>
+      <div class="upgrade-chance" id="upgradeChance" style="display:none;">
+        Шанс: <span id="upgradeChanceVal">0%</span>
+      </div>
+      <button class="upgrade-btn" id="upgradeBtn" disabled>Апгрейд</button>
+      <div class="upgrade-status" id="upgradeStatus"></div>
+    </div>
+  </div>
+
+  <!-- Модалка выбора подарка для апгрейдера -->
+  <div class="upgrade-pick-overlay" id="upgradePickOverlay">
+    <div class="upgrade-pick-sheet">
+      <div class="upgrade-pick-title" id="upgradePickTitle">Выбери подарок</div>
+      <div class="upgrade-pick-grid" id="upgradePickGrid"></div>
     </div>
   </div>
 
@@ -1640,6 +1800,191 @@
       });
     }
     renderInventory();
+
+    // === АПГРЕЙДЕР ===
+    (function() {
+      var GIFTS = {
+        'gift1.png': { name: 'Snoop Dogg', price: 634, emoji: '🐕' },
+        'gift2.png': { name: 'Рука',       price: 5235, emoji: '🖐' },
+        'gift3.png': { name: 'Машина',     price: 10410, emoji: '🚗' }
+      };
+      var GIFTS_LIST = Object.keys(GIFTS);
+
+      var screen   = document.getElementById('upgradeScreen');
+      var wheelEl  = document.getElementById('upgradeWheel');
+      var fromImg  = document.getElementById('upgradeFromImg');
+      var toImg    = document.getElementById('upgradeToImg');
+      var chanceEl = document.getElementById('upgradeChance');
+      var chanceVl = document.getElementById('upgradeChanceVal');
+      var btn      = document.getElementById('upgradeBtn');
+      var statusEl = document.getElementById('upgradeStatus');
+      var pickOvl  = document.getElementById('upgradePickOverlay');
+      var pickGrid = document.getElementById('upgradePickGrid');
+      var pickTitle= document.getElementById('upgradePickTitle');
+
+      var selectedFrom = null;
+      var selectedTo   = null;
+      var spinning     = false;
+
+      function openUpgrade()  { screen.style.display = 'flex'; document.querySelector('.bottom-nav').style.display = 'none'; }
+      function closeUpgrade() { screen.style.display = 'none'; document.querySelector('.bottom-nav').style.display = ''; }
+
+      document.querySelectorAll('[data-open="upgrade"]').forEach(function(el) {
+        el.addEventListener('click', openUpgrade);
+      });
+      document.getElementById('upgradeBack').addEventListener('click', closeUpgrade);
+
+      // Рисуем колесо сегментами (Win / Lose)
+      function drawWheel(winPct) {
+        var lose = 100 - winPct;
+        var gradient = 'conic-gradient(' +
+          '#22c55e 0deg ' + (winPct * 3.6) + 'deg, ' +
+          '#ef4444 ' + (winPct * 3.6) + 'deg 360deg)';
+        wheelEl.style.background = gradient;
+        // Подпись
+        wheelEl.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">' +
+          '<div style="font-size:13px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6);">WIN<br>' + winPct.toFixed(1) + '%</div></div>';
+        wheelEl.style.position = 'relative';
+      }
+      drawWheel(0);
+
+      // Открытие модалки выбора
+      function openPick(type) {
+        var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
+        pickGrid.innerHTML = '';
+        var items = (type === 'from') ? inv : GIFTS_LIST;
+
+        // Для "from" — только из инвентаря
+        // Для "to" — все подарки, но дороже selectedFrom
+        if (type === 'to') {
+          items = GIFTS_LIST.filter(function(k) {
+            return selectedFrom && GIFTS[k].price > GIFTS[selectedFrom].price;
+          });
+          pickTitle.textContent = 'Выбери цель';
+          if (items.length === 0) {
+            pickGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Нет доступных целей</div>';
+          }
+        } else {
+          pickTitle.textContent = 'Выбери свой подарок';
+          // Уникализируем
+          var seen = {};
+          var unique = [];
+          inv.forEach(function(n) { if (!seen[n]) { seen[n] = true; unique.push(n); } });
+          items = unique;
+          if (items.length === 0) {
+            pickGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;">Инвентарь пуст</div>';
+          }
+        }
+
+        items.forEach(function(key) {
+          var g = GIFTS[key];
+          if (!g) return;
+          var div = document.createElement('div');
+          div.className = 'upgrade-pick-item';
+          div.innerHTML = '<img src="' + key + '"><div class="pick-price">' + g.price + ' ⭐</div>';
+          div.addEventListener('click', function() {
+            if (type === 'from') {
+              selectedFrom = key;
+              fromImg.innerHTML = '<img src="' + key + '">';
+            } else {
+              selectedTo = key;
+              toImg.innerHTML = '<img src="' + key + '">';
+            }
+            updateChance();
+            closePick();
+          });
+          pickGrid.appendChild(div);
+        });
+        pickOvl.classList.add('show');
+      }
+
+      function closePick() { pickOvl.classList.remove('show'); }
+
+      fromImg.addEventListener('click', function() { openPick('from'); });
+      toImg.addEventListener('click', function() { openPick('to'); });
+      pickOvl.addEventListener('click', function(e) { if (e.target === pickOvl) closePick(); });
+
+      function updateChance() {
+        if (selectedFrom && selectedTo) {
+          var chance = GIFTS[selectedFrom].price / GIFTS[selectedTo].price * 100;
+          chanceEl.style.display = '';
+          chanceVl.textContent = chance.toFixed(1) + '%';
+          drawWheel(chance);
+          btn.disabled = false;
+        } else {
+          chanceEl.style.display = 'none';
+          drawWheel(0);
+          btn.disabled = true;
+        }
+      }
+
+      btn.addEventListener('click', function() {
+        if (!selectedFrom || !selectedTo || spinning) return;
+        spinning = true;
+        btn.disabled = true;
+        statusEl.textContent = '';
+        statusEl.className = 'upgrade-status';
+
+        var chance = GIFTS[selectedFrom].price / GIFTS[selectedTo].price;
+        var win = Math.random() < chance;
+
+        // Сектор: win вверху (0deg). Lose = всё остальное.
+        var winDeg = chance * 360;
+        var targetDeg;
+        if (win) {
+          // Попасть в зелёный: случайное внутри [0, winDeg)
+          targetDeg = 360 * 5 + Math.random() * winDeg;
+        } else {
+          // Попасть в красный: случайное внутри [winDeg, 360)
+          targetDeg = 360 * 5 + winDeg + Math.random() * (360 - winDeg);
+        }
+
+        wheelEl.classList.remove('spinning');
+        void wheelEl.offsetWidth;
+        wheelEl.classList.add('spinning');
+        wheelEl.style.transform = 'rotate(-' + targetDeg + 'deg)';
+
+        setTimeout(function() {
+          spinning = false;
+          if (win) {
+            // Выиграл: убираем from, добавляем to
+            removeGift(selectedFrom);
+            addGift(selectedTo);
+            statusEl.textContent = '🎉 Апгрейд! ' + GIFTS[selectedTo].name;
+            statusEl.className = 'upgrade-status win';
+            // Обновляем слот
+            selectedFrom = selectedTo;
+            fromImg.innerHTML = '<img src="' + selectedFrom + '">';
+            selectedTo = null;
+            toImg.innerHTML = '<span class="upgrade-plus">+</span>';
+            updateChance();
+          } else {
+            // Проиграл: убираем from
+            removeGift(selectedFrom);
+            selectedFrom = null;
+            fromImg.innerHTML = '<span class="upgrade-plus">+</span>';
+            selectedTo = null;
+            toImg.innerHTML = '<span class="upgrade-plus">+</span>';
+            statusEl.textContent = '💀 Проигрыш';
+            statusEl.className = 'upgrade-status lose';
+            updateChance();
+          }
+          renderInventory();
+        }, 4600);
+      });
+
+      function removeGift(name) {
+        var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
+        var idx = inv.indexOf(name);
+        if (idx !== -1) inv.splice(idx, 1);
+        localStorage.setItem('caseInventory', JSON.stringify(inv));
+      }
+      function addGift(name) {
+        var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
+        inv.push(name);
+        localStorage.setItem('caseInventory', JSON.stringify(inv));
+      }
+    })();
 
     // Нижняя панель: жидкий индикатор-«капля» + свайп между разделами
     const navItems = document.querySelectorAll('.nav-item');
