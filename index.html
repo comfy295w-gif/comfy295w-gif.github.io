@@ -812,34 +812,17 @@
       background: radial-gradient(circle, rgba(255,224,150,0.98), rgba(255,224,150,0.25) 60%, transparent 72%);
       box-shadow: 0 0 26px 6px rgba(255,210,120,0.7);
     }
-    .open-case-btn {
+    .open-case-img {
       margin-top: 22px;
       width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
       border-radius: 26px;
-      padding: 22px 22px;
-      font-size: 19px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      color: #eaf6ff;
       cursor: pointer;
-      position: relative;
-      background: url('open-case-btn.jpg') center/100% 100% no-repeat;
-      box-shadow: 0 12px 26px rgba(0,0,0,0.45);
-      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      transition: transform 0.12s ease;
     }
-    .open-case-btn:active {
-      transform: translateY(2px) scale(0.99);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.45);
-    }
-    .open-case-btn:disabled { opacity: 0.6; pointer-events: none; filter: saturate(0.7); }
+    .open-case-img:active { transform: scale(0.97); }
+    .open-case-img:disabled { opacity: 0.6; pointer-events: none; filter: saturate(0.7); }
     .case-status {
       text-align: center;
       margin-top: 10px;
@@ -1233,7 +1216,7 @@
         <div class="roulette-line"></div>
         <div class="roulette-track" id="rouletteTrack"></div>
       </div>
-      <button class="open-case-btn" id="openCaseBtn">Открыть за 100 <img src="star.png" class="star-icon" alt="⭐"></button>
+      <img src="open-case-btn.jpg" id="openCaseBtn" class="open-case-img" alt="Открыть">
       <div class="case-status" id="caseStatus"></div>
     </div>
   </div>
@@ -1525,12 +1508,13 @@
       const backBtn = document.getElementById('caseBack');
       if (backBtn) backBtn.addEventListener('click', caseClose);
 
+      let caseSpinning = false;
       if (btn) {
         btn.addEventListener('click', async function () {
-          if (btn.disabled) return;
+          if (caseSpinning) return;
           const balNow = parseInt(document.getElementById('balanceValue').textContent || '0', 10);
           if (balNow < 100) { statusEl.innerHTML = '⚠️ Недостаточно звёзд для открытия'; return; }
-          btn.disabled = true;
+          caseSpinning = true;
           statusEl.innerHTML = 'Открываем кейс…';
           try {
             const resp = await fetch(SERVER_URL + '/api/case/open', {
@@ -1541,7 +1525,7 @@
             const d = await resp.json();
             if (!d.ok) {
               statusEl.innerHTML = '⚠️ ' + (d.error || 'Ошибка');
-              btn.disabled = false;
+              caseSpinning = false;
               return;
             }
             document.getElementById('balanceValue').textContent = d.balance;
@@ -1559,11 +1543,11 @@
               track.querySelectorAll('.roulette-cell').forEach(function (c) { c.classList.remove('result'); });
               if (track.children[land]) track.children[land].classList.add('result');
               statusEl.innerHTML = '🎉 Кейс открыт! Линия указала на ячейку #' + (land + 1);
-              btn.disabled = false;
+              caseSpinning = false;
             }, 4700);
           } catch (e) {
             statusEl.innerHTML = '⚠️ Ошибка сети';
-            btn.disabled = false;
+            caseSpinning = false;
           }
         });
       }
