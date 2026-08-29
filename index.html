@@ -412,6 +412,16 @@
       transform: perspective(300px) translateZ(8px);
     }
     .mines-chip:active { transform: perspective(300px) translateZ(2px) scale(0.96); }
+    .mines-bet-row { margin-top: 2px; }
+    .mines-bet-input {
+      width: 88px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px; color: #fff; padding: 9px 12px; font-size: 14px; font-weight: 700; outline: none;
+      -webkit-backdrop-filter: blur(10px) saturate(140%); backdrop-filter: blur(10px) saturate(140%);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.10);
+    }
+    .mines-bet-input::placeholder { color: rgba(255,255,255,0.45); font-weight: 500; }
+    .mines-bet-input:focus { border-color: rgba(124,92,255,0.7); box-shadow: 0 0 0 3px rgba(124,92,255,0.22), inset 0 1px 1px rgba(255,255,255,0.10); }
+    .mines-bet-input::-webkit-outer-spin-button, .mines-bet-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .mines-x-label {
       text-align: center; font-size: 28px; font-weight: 800; color: var(--gold);
       background: linear-gradient(180deg, rgba(255,215,0,0.20), rgba(255,140,0,0.10));
@@ -672,6 +682,15 @@
       border-color: transparent; color: #fff;
       box-shadow: 0 8px 24px rgba(124,92,255,0.35);
     }
+    .profile-server { margin-top: 16px; }
+    .profile-server-input {
+      flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px; color: #fff; padding: 10px 12px; font-size: 14px; outline: none;
+      -webkit-backdrop-filter: blur(10px) saturate(140%); backdrop-filter: blur(10px) saturate(140%);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.10);
+    }
+    .profile-server-input::placeholder { color: rgba(255,255,255,0.45); }
+    .profile-server-input:focus { border-color: rgba(124,92,255,0.7); box-shadow: 0 0 0 3px rgba(124,92,255,0.22), inset 0 1px 1px rgba(255,255,255,0.10); }
     .profile-stat-row {
       width: 100%; max-width: 340px;
       display: flex; gap: 10px;
@@ -1065,6 +1084,14 @@
           <button class="mines-chip selected" data-mines="8">8</button>
           <button class="mines-chip" data-mines="10">10</button>
         </div>
+        <div class="mines-bet-row" style="display:flex; gap:8px; justify-content:flex-start; align-items:center; flex-wrap:wrap;">
+          <span style="font-size:13px;color:var(--muted);font-weight:600;">Ставка:</span>
+          <button class="mines-chip" data-bet="10">10</button>
+          <button class="mines-chip" data-bet="50">50</button>
+          <button class="mines-chip selected" data-bet="100">100</button>
+          <button class="mines-chip" data-bet="500">500</button>
+          <input id="minesCustomBet" class="mines-bet-input" type="number" min="10" placeholder="своя" inputmode="numeric">
+        </div>
       </div>
       <div style="margin-top:16px; display:flex; gap:10px; justify-content:center; align-items:center;">
         <button class="mines-play-btn" id="minesStart">🎮 Играть — 100 <img src="star.png" class="star-icon" alt="⭐"></button>
@@ -1170,6 +1197,15 @@
       <div class="profile-actions">
         <button class="profile-action-btn primary" id="profileTopup"><img src="star.png" class="star-icon" alt="⭐"> Пополнить баланс</button>
         <button class="profile-action-btn" id="profileReferral">👥 Пригласить друга</button>
+      </div>
+
+      <div class="profile-server">
+        <div class="profile-payments-title">⚙ Сервер API</div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input id="serverUrlInput" class="profile-server-input" placeholder="https://xxxx.ngrok-free.dev">
+          <button class="profile-action-btn primary" id="serverUrlSave" style="white-space:nowrap;">Сохранить</button>
+        </div>
+        <div id="serverUrlMsg" style="font-size:12px; color:var(--muted); margin-top:6px;"></div>
       </div>
     </div>
   </div>
@@ -1347,7 +1383,10 @@
     });
 
     // Оплата через Telegram Stars — прямо в мини-аппе
-    const SERVER_URL = 'https://linguist-cloud-manned.ngrok-free.dev';
+    const SERVER_URL = (function () {
+      try { return localStorage.getItem('minesServerUrl') || 'http://localhost:8080'; }
+      catch (e) { return 'http://localhost:8080'; }
+    })();
     topupPayBtn.addEventListener('click', async () => {
       const amount = parseInt(topupAmount.value, 10);
       if (!amount || amount < 1) return;
@@ -1399,7 +1438,7 @@
 
     // === АРЕНА ===
     // Адрес сервера бота (через ngrok туннель)
-    const ARENA_API = 'https://linguist-cloud-manned.ngrok-free.dev/api/arena';
+    const ARENA_API = SERVER_URL + '/api/arena';
     const ARENA_BASE = ARENA_API.replace(/\/arena$/, '');
     function avatarUrl(userId) { return ARENA_BASE + '/avatar/' + userId; }
 
@@ -2018,6 +2057,33 @@
         selectedMineCount = Number(btn.dataset.mines);
       });
     });
+    // Выбор ставки: быстрые кнопки + свободный ввод (от 10)
+    function updateMinesBetLabel() {
+      const b = Math.max(10, selectedMinesBet || 0);
+      const el = document.getElementById('minesStart');
+      if (el) el.innerHTML = '🎮 Играть — ' + b + ' <img src="star.png" class="star-icon" alt="⭐">';
+    }
+    document.querySelectorAll('.mines-bet-row .mines-chip').forEach((btn)=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.mines-bet-row .mines-chip').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMinesBet = Number(btn.dataset.bet);
+        const ci = document.getElementById('minesCustomBet'); if (ci) ci.value = '';
+        updateMinesBetLabel();
+      });
+    });
+    const minesCustomBetInput = document.getElementById('minesCustomBet');
+    if (minesCustomBetInput) {
+      minesCustomBetInput.addEventListener('input', () => {
+        const v = parseInt(minesCustomBetInput.value, 10);
+        if (!isNaN(v) && v >= 10) {
+          selectedMinesBet = v;
+          document.querySelectorAll('.mines-bet-row .mines-chip').forEach(b=>b.classList.remove('selected'));
+          updateMinesBetLabel();
+        }
+      });
+    }
+    updateMinesBetLabel();
 
     function minesEscapeHtml(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ({
@@ -2121,10 +2187,10 @@
 
     // Кнопка "В игру": списываем ставку и генерируем поле
     (document.getElementById('minesStart')||{addEventListener:()=>{}}).addEventListener('click', async () => {
-      const customVal = (document.getElementById('minesCustomBet')?.value||'');
+      const customVal = (document.getElementById('minesCustomBet') && document.getElementById('minesCustomBet').value ? document.getElementById('minesCustomBet').value : '');
       const bet = parseInt(customVal, 10) > 0 ? parseInt(customVal, 10) : selectedMinesBet;
-      if (!bet || bet < 5) {
-        if(minesStatusEl) minesStatusEl.innerHTML = '⚠️ Введи сумму от 5 <img src="star.png" class="star-icon" alt="⭐">';
+      if (!bet || bet < 10) {
+        if(minesStatusEl) minesStatusEl.innerHTML = '⚠️ Введи сумму от 10 <img src="star.png" class="star-icon" alt="⭐">';
         return;
       }
       if(minesStatusEl) minesStatusEl.innerHTML = '⏳ Ставка принимается...';
@@ -2156,7 +2222,6 @@
         minesState.payout = 0;
         minesState.playing = true;
 
-        document.getElementById('minesSetupPanel').style.display = 'none';
         { const _ma2 = document.getElementById('minesAgain'); if(_ma2) _ma2.style.display = 'none'; }
         document.getElementById('minesScreen').classList.remove('idle');
         if(minesStatusEl) minesStatusEl.innerHTML = '🎮 Игра началась. Мин: <b>' + selectedMineCount + '</b>, ставка: <b>' + bet + ' <img src="star.png" class="star-icon" alt="⭐"></b>';
@@ -2171,7 +2236,6 @@
 
     // Новая игра: возврат к настройкам ставки
     (document.getElementById('minesAgain')||{addEventListener:()=>{}}).addEventListener('click', () => {
-      document.getElementById('minesSetupPanel').style.display = '';
       minesState.playing = false;
       minesState.mult = 1;
       document.getElementById('minesScreen').classList.add('idle');
@@ -2198,7 +2262,7 @@
     document.getElementById('arenaBack').addEventListener('click', closeArenaScreen);
 
     // === ПРОФИЛЬ ===
-    const ARENA_BASE_URL = 'https://linguist-cloud-manned.ngrok-free.dev';
+    const ARENA_BASE_URL = SERVER_URL;
     let profileStatsLoaded = false;
 
     function openProfileScreen() {
@@ -2314,6 +2378,23 @@
         alert(botLink);
       }
     });
+
+    // Настройка сервера API (туннель): сохраняем в localStorage
+    const serverUrlInput = document.getElementById('serverUrlInput');
+    const serverUrlMsg = document.getElementById('serverUrlMsg');
+    const serverUrlSave = document.getElementById('serverUrlSave');
+    if (serverUrlInput) {
+      try { serverUrlInput.value = localStorage.getItem('minesServerUrl') || SERVER_URL; } catch (e) {}
+      if (serverUrlSave) {
+        serverUrlSave.addEventListener('click', () => {
+          const v = (serverUrlInput.value || '').trim().replace(/\/+$/, '');
+          if (!v) { serverUrlMsg.textContent = 'Введите адрес сервера'; return; }
+          try { localStorage.setItem('minesServerUrl', v); } catch (e) {}
+          serverUrlMsg.textContent = '✅ Сохранено. Перезагрузка...';
+          setTimeout(() => location.reload(), 600);
+        });
+      }
+    }
 
   </script>
 </body>
