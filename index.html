@@ -777,6 +777,8 @@
       aspect-ratio: 1;
       object-fit: contain;
     }
+    .inventory-item.img-big img { width: 92%; }
+    .inventory-item.img-small img { width: 68%; }
     .inventory-item .item-price {
       font-size: 11px;
       font-weight: 700;
@@ -1621,10 +1623,11 @@
       if (!grid) return;
       var inv = JSON.parse(localStorage.getItem('caseInventory') || '[]');
       var prices = { 'gift1.png': '634 ⭐', 'gift2.png': '10 410 ⭐', 'gift3.png': '10 410 ⭐' };
+      var sizes = { 'gift1.png': 'img-big', 'gift2.png': 'img-small' };
       grid.innerHTML = '';
       inv.forEach(function (name) {
         var div = document.createElement('div');
-        div.className = 'inventory-item';
+        div.className = 'inventory-item' + (sizes[name] ? ' ' + sizes[name] : '');
         var img = document.createElement('img');
         img.src = name;
         div.appendChild(img);
