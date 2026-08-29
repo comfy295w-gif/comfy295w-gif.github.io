@@ -801,7 +801,12 @@
       pointer-events: none;
     }
     .roulette-cell .cell-dog {
-      display: none;
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 8px rgba(100,180,255,0.4));
     }
     .roulette-cell.result {
       border-color: rgba(255,255,255,0.6);
@@ -1483,7 +1488,12 @@
         for (let i = 0; i < CELLS; i++) {
           const c = document.createElement('div');
           c.className = 'roulette-cell';
-          track.appendChild(c);
+          const imgs = ['snoop.png','car.png','hand.png'];
+          const img = document.createElement('img');
+          img.src = imgs[Math.floor(Math.random() * imgs.length)];
+          img.className = 'cell-dog';
+          img.alt = '';
+          c.appendChild(img);
           track.appendChild(c);
         }
         window.addEventListener('resize', centerTrack);
