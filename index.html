@@ -1384,8 +1384,8 @@
 
     // Оплата через Telegram Stars — прямо в мини-аппе
     const SERVER_URL = (function () {
-      try { return localStorage.getItem('minesServerUrl') || 'http://localhost:8080'; }
-      catch (e) { return 'http://localhost:8080'; }
+      try { return localStorage.getItem('minesServerUrl') || 'https://linguist-cloud-manned.ngrok-free.dev'; }
+      catch (e) { return 'https://linguist-cloud-manned.ngrok-free.dev'; }
     })();
     topupPayBtn.addEventListener('click', async () => {
       const amount = parseInt(topupAmount.value, 10);
