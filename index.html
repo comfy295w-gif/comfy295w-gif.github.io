@@ -1656,12 +1656,12 @@
     document.getElementById('balanceValue').textContent = isNaN(balanceCount) ? 0 : balanceCount;
 
     // Подтягиваем актуальный баланс с сервера (на случай /give или другого пополнения)
-    const SERVER_URL = localStorage.getItem('minesServerUrl') || 'https://linguist-cloud-manned.ngrok-free.dev';
     (async function() {
       try {
         const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
         if (!uid) return;
-        const res = await fetch(SERVER_URL + '/api/balance?userId=' + uid, {
+        const _sUrl = localStorage.getItem('minesServerUrl') || 'https://linguist-cloud-manned.ngrok-free.dev';
+        const res = await fetch(_sUrl + '/api/balance?userId=' + uid, {
           headers: { 'ngrok-skip-browser-warning': 'true' }
         });
         const data = await res.json();
